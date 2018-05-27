@@ -25,7 +25,7 @@ namespace KSTS
         {
             if (vessel.situation != Vessel.Situations.ORBITING) return false;
             if (vessel.orbit == null) return false;
-            if (vessel.orbit.referenceBody != FlightGlobals.GetHomeBody()) return false; // We simply assume that we can only launch missions from our home-planet.
+            if (vessel.orbit.referenceBody.bodyName != profile.bodyName) return false; // Can only record orbits around the launch body
 
             List<string> dockingPortTypes = GetVesselDockingPortTypes(vessel);
             if (dockingPortTypes.Count == 0) return false; // We have to dock for a transport-mission.

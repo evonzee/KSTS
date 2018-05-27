@@ -296,7 +296,7 @@ namespace KSTS
             {
                 if (pressureCurve.Curve[i].value == 0)
                 {
-                    minAltitude = pressureCurve.Curve[i].time;
+                    minAltitude = Math.Max(pressureCurve.Curve[i].time, 1); // Min orbit on a body with no atmosphere assumed to be 1
                     break;
                 }
             }
@@ -506,6 +506,8 @@ namespace KSTS
                     this.currentStats.mass.ToString("#,##0.00") + " / " +
                     this.launchMass.ToString("#,##0.00 t")
                 ));
+
+                list.Add(new KeyValuePair<string, string>("Body", this.launchBodyName));
 
                 if (this.maxAltitude > 0)
                 {
