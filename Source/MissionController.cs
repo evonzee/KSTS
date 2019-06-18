@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Linq;
+using KSP.UI.Screens.DebugToolbar.Screens.Cheats;
 
 namespace KSTS
 {
     // Actual running mission:
-    public enum MissionType { DEPLOY=1, TRANSPORT=2, CONSTRUCT=3 };
+    public enum MissionType { DEPLOY = 1, TRANSPORT = 2, CONSTRUCT = 3 };
     public class Mission : Saveable
     {
+
         public MissionType missionType;
         public Orbit orbit = null;      // The orbit in which the new vesselo should get launched
         public string shipName = "";    // Name of the new vessel
@@ -28,7 +32,11 @@ namespace KSTS
 
         public MissionProfile GetProfile()
         {
-            if (MissionController.missionProfiles.ContainsKey(profileName)) return MissionController.missionProfiles[profileName];
+            if (MissionController.missionProfiles.ContainsKey(profileName))
+            {
+                return MissionController.missionProfiles[profileName];
+            }
+
             return null;
         }
 
@@ -39,9 +47,21 @@ namespace KSTS
 
         public static string GetMissionTypeName(MissionType type)
         {
-            if (type == MissionType.DEPLOY) return "deployment";
-            if (type == MissionType.TRANSPORT) return "transport";
-            if (type == MissionType.CONSTRUCT) return "construction";
+            if (type == MissionType.DEPLOY)
+            {
+                return "deployment";
+            }
+
+            if (type == MissionType.TRANSPORT)
+            {
+                return "transport";
+            }
+
+            if (type == MissionType.CONSTRUCT)
+            {
+                return "construction";
+            }
+
             return "N/A";
         }
 
@@ -55,51 +75,68 @@ namespace KSTS
 
         public static Mission CreateDeployment(string shipName, ShipTemplate template, Orbit orbit, MissionProfile profile, List<string> crew, string flagURL)
         {
-            Mission mission = new Mission();
-            mission.missionType = MissionType.DEPLOY;
-            mission.shipTemplateFilename = SanitizePath(template.filename); // The filename contains silly portions like "KSP_x64_Data/..//saves", which break savegames because "//" starts a comment in the savegame ...
-            mission.orbit = orbit;
-            mission.shipName = shipName;
-            mission.profileName = profile.profileName;
-            mission.eta = Planetarium.GetUniversalTime() + profile.missionDuration;
-            mission.crewToDeliver = crew; // The crew we want the new vessel to start with.
-            mission.flagURL = flagURL;
+            var mission = new Mission
+            {
+                missionType = MissionType.DEPLOY,
+                shipTemplateFilename = SanitizePath(template.filename),
+                orbit = orbit,
+                shipName = shipName,
+                profileName = profile.profileName,
+                eta = Planetarium.GetUniversalTime() + profile.missionDuration,
+                crewToDeliver = crew,
+                flagURL = flagURL
+            };
+            // The filename contains silly portions like "KSP_x64_Data/..//saves", which break savegames because "//" starts a comment in the savegame ...
+            // The crew we want the new vessel to start with.
 
             return mission;
         }
 
         public static Mission CreateTransport(Vessel target, MissionProfile profile, List<PayloadResource> resources, List<CrewTransferOrder> crewTransfers)
         {
-            Mission mission = new Mission();
-            mission.missionType = MissionType.TRANSPORT;
-            mission.profileName = profile.profileName;
-            mission.eta = Planetarium.GetUniversalTime() + profile.missionDuration;
+            var mission = new Mission
+            {
+                missionType = MissionType.TRANSPORT,
+                profileName = profile.profileName,
+                eta = Planetarium.GetUniversalTime() + profile.missionDuration,
+                targetVesselId = target.protoVessel.vesselID
+            };
 
-            mission.targetVesselId = target.protoVessel.vesselID;
             if (resources != null)
             {
                 mission.resourcesToDeliver = new Dictionary<string, double>();
-                foreach (PayloadResource resource in resources)
+                foreach (var resource in resources)
                 {
-                    if (resource.amount > 0) mission.resourcesToDeliver.Add(resource.name, resource.amount);
+                    if (resource.amount > 0)
+                    {
+                        mission.resourcesToDeliver.Add(resource.name, resource.amount);
+                    }
                 }
             }
             if (crewTransfers != null)
             {
-                foreach (CrewTransferOrder crewTransfer in crewTransfers)
+                foreach (var crewTransfer in crewTransfers)
                 {
                     switch (crewTransfer.direction)
                     {
                         case CrewTransferOrder.CrewTransferDirection.DELIVER:
-                            if (mission.crewToDeliver == null) mission.crewToDeliver = new List<string>();
+                            if (mission.crewToDeliver == null)
+                            {
+                                mission.crewToDeliver = new List<string>();
+                            }
+
                             mission.crewToDeliver.Add(crewTransfer.kerbalName);
                             break;
                         case CrewTransferOrder.CrewTransferDirection.COLLECT:
-                            if (mission.crewToCollect == null) mission.crewToCollect = new List<string>();
+                            if (mission.crewToCollect == null)
+                            {
+                                mission.crewToCollect = new List<string>();
+                            }
+
                             mission.crewToCollect.Add(crewTransfer.kerbalName);
                             break;
                         default:
-                            throw new Exception("unknown transfer-direction: '"+ crewTransfer.direction.ToString() + "'");
+                            throw new Exception("unknown transfer-direction: '" + crewTransfer.direction.ToString() + "'");
                     }
                 }
             }
@@ -109,22 +146,25 @@ namespace KSTS
 
         public static Mission CreateConstruction(string shipName, ShipTemplate template, Vessel spaceDock, MissionProfile profile, List<string> crew, string flagURL, double constructionTime)
         {
-            Mission mission = new Mission();
-            mission.missionType = MissionType.CONSTRUCT;
-            mission.shipTemplateFilename = SanitizePath(template.filename);
-            mission.targetVesselId = spaceDock.protoVessel.vesselID;
-            mission.shipName = shipName;
-            mission.profileName = profile.profileName;
-            mission.eta = Planetarium.GetUniversalTime() + constructionTime;
-            mission.crewToDeliver = crew; // The crew we want the new vessel to start with.
-            mission.flagURL = flagURL;
+            var mission = new Mission
+            {
+                missionType = MissionType.CONSTRUCT,
+                shipTemplateFilename = SanitizePath(template.filename),
+                targetVesselId = spaceDock.protoVessel.vesselID,
+                shipName = shipName,
+                profileName = profile.profileName,
+                eta = Planetarium.GetUniversalTime() + constructionTime,
+                crewToDeliver = crew,
+                flagURL = flagURL
+            };
+            // The crew we want the new vessel to start with.
 
             return mission;
         }
 
         public static Mission CreateFromConfigNode(ConfigNode node)
         {
-            Mission mission = new Mission();
+            var mission = new Mission();
             return (Mission)CreateFromConfigNode(node, mission);
         }
 
@@ -165,7 +205,11 @@ namespace KSTS
                     if (FlightGlobals.ActiveVessel == null || FlightGlobals.ActiveVessel.id != targetVesselId)
                     {
                         Vessel targetVessel = null;
-                        if (!MissionController.missionProfiles.ContainsKey(profileName)) throw new Exception("unable to execute transport-mission, profile '"+ profileName + "' missing");
+                        if (!MissionController.missionProfiles.ContainsKey(profileName))
+                        {
+                            throw new Exception("unable to execute transport-mission, profile '" + profileName + "' missing");
+                        }
+
                         if (targetVesselId == null || (targetVessel = TargetVessel.GetVesselById((Guid)targetVesselId)) == null || !TargetVessel.IsValidTarget(targetVessel, MissionController.missionProfiles[profileName]))
                         {
                             // Abort mission (maybe the vessel was removed or got moved out of range):
@@ -177,15 +221,24 @@ namespace KSTS
                             // Do the actual transport-mission:
                             if (resourcesToDeliver != null)
                             {
-                                foreach (KeyValuePair<string, double> item in resourcesToDeliver) TargetVessel.AddResources(targetVessel, item.Key, item.Value);
+                                foreach (var item in resourcesToDeliver)
+                                {
+                                    TargetVessel.AddResources(targetVessel, item.Key, item.Value);
+                                }
                             }
                             if (crewToCollect != null)
                             {
-                                foreach (string kerbonautName in crewToCollect) TargetVessel.RecoverCrewMember(targetVessel, kerbonautName);
+                                foreach (var kerbonautName in crewToCollect)
+                                {
+                                    TargetVessel.RecoverCrewMember(targetVessel, kerbonautName);
+                                }
                             }
                             if (crewToDeliver != null)
                             {
-                                foreach (string kerbonautName in crewToDeliver) TargetVessel.AddCrewMember(targetVessel, kerbonautName);
+                                foreach (var kerbonautName in crewToDeliver)
+                                {
+                                    TargetVessel.AddCrewMember(targetVessel, kerbonautName);
+                                }
                             }
                         }
                         return true;
@@ -199,17 +252,121 @@ namespace KSTS
 
         // Helper function for building an ordered list of parts which are attached to the given root-part. The resulting
         // List is passed by reference and also returend.
-        private List<Part> FindAndAddAttachedParts(Part p,ref List<Part> list)
+        private List<Part> FindAndAddAttachedParts(Part p, ref List<Part> list)
         {
-            if (list == null) list = new List<Part>();
-            if (list.Contains(p)) return list;
-            list.Add(p);
-            foreach (AttachNode an in p.attachNodes)
+            if (list == null)
             {
-                if (an.attachedPart == null || list.Contains(an.attachedPart)) continue;
-                FindAndAddAttachedParts(an.attachedPart,ref list);
+                list = new List<Part>();
+            }
+
+            if (list.Contains(p))
+            {
+                return list;
+            }
+
+            list.Add(p);
+            foreach (var an in p.attachNodes)
+            {
+                if (an.attachedPart == null || list.Contains(an.attachedPart))
+                {
+                    continue;
+                }
+
+                FindAndAddAttachedParts(an.attachedPart, ref list);
             }
             return list;
+        }
+
+        public static IEnumerable<ProtoCrewMember> CrewRoster()
+        {
+            var crew = HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Crew, ProtoCrewMember.RosterStatus.Available);
+            var tourists = HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Tourist, ProtoCrewMember.RosterStatus.Available);
+            var roster = crew.Concat(tourists);
+            return roster;
+        }
+
+        public static Vessel AssembleForLaunchUnlanded(ShipConstruct ship, IEnumerable<string> crewToDeliver, double duration, Orbit orbit,
+                                                       string flagUrl, Game sceneState)
+        {
+            var localRoot = ship.parts[0].localRoot;
+            var vessel = localRoot.gameObject.GetComponent<Vessel>();
+            if (vessel == null)
+            {
+                vessel = localRoot.gameObject.AddComponent<Vessel>();
+            }
+
+            vessel.id = Guid.NewGuid();
+            vessel.vesselName = ship.shipName;
+            vessel.persistentId = ship.persistentId;
+            vessel.Initialize();
+            if (orbit != null)
+            {
+                var orbitDriver = vessel.gameObject.GetComponent<OrbitDriver>();
+                if (orbitDriver == null)
+                {
+                    orbitDriver = vessel.gameObject.AddComponent<OrbitDriver>();
+                    vessel.orbitDriver = orbitDriver;
+                }
+            }
+            vessel.Landed = false;
+            vessel.Splashed = false;
+            vessel.skipGroundPositioning = true;
+            vessel.vesselSpawning = false;
+            // vessel.loaded = false;
+
+            var pCrewMembers = CrewRoster().Where(k => crewToDeliver.Contains(k?.name)).ToList();
+            // Maybe add the initial crew to the vessel:
+            if (pCrewMembers.Any())
+            {
+                CrewTransferBatch.moveCrew(vessel, pCrewMembers, false);
+                LifeSupportWrapper.Instance.PrepForLaunch(vessel, pCrewMembers, duration);
+                pCrewMembers.ForEach(pcm =>
+                {
+                    pcm.rosterStatus = ProtoCrewMember.RosterStatus.Assigned;
+                    // Add the phases the kerbonaut would have gone through during his launch to his flight-log:
+                    var homeBody = Planetarium.fetch.Home;
+                    pcm.flightLog.AddEntry(FlightLog.EntryType.Launch, homeBody.bodyName);
+                    pcm.flightLog.AddEntry(FlightLog.EntryType.Flight, homeBody.bodyName);
+                    pcm.flightLog.AddEntry(FlightLog.EntryType.Suborbit, homeBody.bodyName);
+                    pcm.flightLog.AddEntry(FlightLog.EntryType.Orbit, homeBody.bodyName);
+                    if (orbit.referenceBody != homeBody)
+                    {
+                        pcm.flightLog.AddEntry(FlightLog.EntryType.Escape, homeBody.bodyName);
+                        pcm.flightLog.AddEntry(FlightLog.EntryType.Orbit, orbit.referenceBody.bodyName);
+                    }
+                });
+            }
+
+            // TODO this seems like overkill so commenting out, we'll see...
+            vessel.orbitDriver.UpdateOrbit();
+            vessel.SetOrbit(orbit);
+            vessel.orbitDriver.UpdateOrbit();
+            var hashCode = (uint)Guid.NewGuid().GetHashCode();
+            var launchId = HighLogic.CurrentGame.launchID++;
+            foreach (var part in vessel.parts)
+            {
+                part.flightID = ShipConstruction.GetUniqueFlightID(sceneState.flightState);
+                part.missionID = hashCode;
+                part.launchID = launchId;
+                part.flagURL = flagUrl;
+            }
+            if (localRoot.isControlSource == Vessel.ControlLevel.NONE)
+            {
+                var firstCrewablePart = ShipConstruction.findFirstCrewablePart(ship.parts[0]);
+                if (firstCrewablePart == null)
+                {
+                    var firstControlSource = ShipConstruction.findFirstControlSource(vessel);
+                    firstCrewablePart = firstControlSource ?? localRoot;
+                }
+                vessel.SetReferenceTransform(firstCrewablePart, true);
+            }
+            else
+            {
+                vessel.SetReferenceTransform(localRoot, true);
+            }
+
+            Debug.Log("Vessel assembled for launch: " + vessel.vesselName);
+            return vessel;
         }
 
         // Creates a new ship with the given parameters for this mission. The code however seems unnecessarily convoluted and
@@ -219,17 +376,21 @@ namespace KSTS
             try
             {
                 // The ShipConstruct-object can only savely exist while not in flight, otherwise it will spam Null-Pointer Exceptions every tick:
-                if (HighLogic.LoadedScene == GameScenes.FLIGHT) throw new Exception("unable to run CreateShip while in flight");
+                if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+                {
+                    throw new Exception("unable to run CreateShip while in flight");
+                }
 
                 // Load the parts form the saved vessel:
-                if (!File.Exists(shipTemplateFilename)) throw new Exception("file '" + shipTemplateFilename + "' not found");
-                ShipConstruct shipConstruct = ShipConstruction.LoadShip(shipTemplateFilename);
-                ProtoVessel dummyProto = new ProtoVessel(new ConfigNode(), null);
-                Vessel dummyVessel = new Vessel();
-                dummyProto.vesselRef = dummyVessel;
+                if (!File.Exists(shipTemplateFilename))
+                {
+                    throw new Exception("file '" + shipTemplateFilename + "' not found");
+                }
+
+                var shipConstruct = ShipConstruction.LoadShip(shipTemplateFilename);
 
                 // Maybe adjust the orbit:
-                float vesselHeight = Math.Max(Math.Max(shipConstruct.shipSize.x, shipConstruct.shipSize.y), shipConstruct.shipSize.z);
+                var vesselHeight = Math.Max(Math.Max(shipConstruct.shipSize.x, shipConstruct.shipSize.y), shipConstruct.shipSize.z);
                 if (missionType == MissionType.DEPLOY)
                 {
                     // Make sure that there won't be any collisions, when the vessel is created at the given orbit:
@@ -238,146 +399,48 @@ namespace KSTS
                 else if (missionType == MissionType.CONSTRUCT)
                 {
                     // Deploy the new ship next to the space-dock:
-                    Vessel spaceDock = TargetVessel.GetVesselById((Guid)targetVesselId);
+                    var spaceDock = TargetVessel.GetVesselById((Guid)targetVesselId);
                     orbit = GUIOrbitEditor.CreateFollowingOrbit(spaceDock.orbit, TargetVessel.GetVesselSize(spaceDock) + vesselHeight);
                     orbit = GUIOrbitEditor.ApplySafetyDistance(orbit, vesselHeight);
                 }
-                else throw new Exception("invalid mission-type '" + missionType.ToString() + "'");
-
-                // Instead of loading and constructing the ship ourselfs ShipConstruction.AssembleForLaunch() seems like the better
-                // option, this however just seems to work while in flight and even then I was unable to get it working correctly
-                // (it switches to the newly created ship and setting an orbit afterwards does not work correctly).
-
-                // In theory it should be enough to simply copy the parts from the ShipConstruct to the ProtoVessel, but
-                // this only seems to work when the saved vessel starts with the root-part and is designed top down from there.
-                // It seems that the root part has to be the first part in the ProtoVessel's parts-list and all other parts have
-                // to be listed in sequence radiating from the root part (eg 1=>2=>R<=3<=4 should be R,2,1,3,4). If the parts
-                // are not in the correct order, their rotation seems to get messed up or they are attached to the wrong
-                // attachmet-nodes, which is why we have to re-sort the parts with our own logic here.
-                // This part of the code is experimental however and only based on my own theories and observations about KSP's vessels.
-                Part rootPart = null;
-                foreach (Part p in shipConstruct.parts)
+                else
                 {
-                    if (p.parent == null) { rootPart = p; break; }
-                }
-                List<Part> pList = null;
-                dummyVessel.parts = FindAndAddAttachedParts(rootPart, ref pList); // Find all parts which are directly attached to the root-part and add them in order.
-
-                // Handle Subassemblies which are attached by surface attachment-nodes:
-                bool handleSurfaceAttachments = true;
-                while (dummyVessel.parts.Count < shipConstruct.parts.Count)
-                {
-                    int processedParts = 0;
-                    foreach (Part p in shipConstruct.parts)
-                    {
-                        if (dummyVessel.parts.Contains(p)) continue;
-                        if (handleSurfaceAttachments)
-                        {
-                            // Check if the part is attached by a surface-node:
-                            if (p.srfAttachNode != null && dummyVessel.parts.Contains(p.srfAttachNode.attachedPart))
-                            {
-                                // Add this surface attached part and all the sub-parts:
-                                dummyVessel.parts = FindAndAddAttachedParts(p, ref dummyVessel.parts);
-                                processedParts++;
-                            }
-                        }
-                        else
-                        {
-                            // Simply copy this part:
-                            dummyVessel.parts.Add(p);
-                        }
-                    }
-                    if (processedParts == 0)
-                    {
-                        // If there are still unprocessed parts, just throw them in the list during the next iteration,
-                        // this should not happen but we don't want to end up in an endless loop:
-                        handleSurfaceAttachments = false;
-                    }
+                    throw new Exception("invalid mission-type '" + missionType + "'");
                 }
 
-                // Initialize all parts:
-                uint missionID = (uint)Guid.NewGuid().GetHashCode();
-                uint launchID = HighLogic.CurrentGame.launchID++;
-                int maxStageOffset = -1;
-                foreach (Part p in dummyVessel.parts)
-                {
-                    p.flagURL = flagURL == null ? HighLogic.CurrentGame.flagURL : flagURL;
-                    p.missionID = missionID;
-                    p.launchID = launchID;
-                    p.temperature = 1.0;
-                    maxStageOffset = Math.Max(p.stageOffset, maxStageOffset); // stageOffset is offset of this part in the staging-order (0..n with -1 meaning not staged)
-
-                    // Apparently the part's ID from the saved craft is stored in craftID and has to get copied by hand into flightID, which is 0 by default.
-                    // If it is not set, docking won't work and since it is referenced by surface-attachments like struts and fuel lines, it should always
-                    // be the same as in the stored craft:
-                    p.flightID = p.craftID;
-
-                    // If the KRnD-Mod is installed, make sure that all parts of this newly created ship are set to the lates version:
-                    foreach (PartModule module in p.Modules)
-                    {
-                        if (module.moduleName != "KRnDModule") continue;
-                        Debug.Log("[KSTS] found KRnD on '" + p.name.ToString() + "', setting to latest stats");
-                        foreach (BaseField field in module.Fields)
-                        {
-                            if (field.name.ToString() == "upgradeToLatest")
-                            {
-                                field.SetValue(1, module); // Newer versions of KRnD use this flag to upgrade all attributes of the given part to the latest levels, when the vessel is activated.
-                                if (field.GetValue(module).ToString() != "1") Debug.LogError("[KSTS] unable to modify '" + field.name.ToString() + "'");
-                            }
-                        }
-                    }
-
-                    dummyProto.protoPartSnapshots.Add(new ProtoPartSnapshot(p, dummyProto));
-                }
-
-                // Store the parts in Config-Nodes:
-                foreach (ProtoPartSnapshot p in dummyProto.protoPartSnapshots)
-                {
-                    p.storePartRefs();
-                }
-                List<ConfigNode> partNodesL = new List<ConfigNode>();
-                foreach (ProtoPartSnapshot snapShot in dummyProto.protoPartSnapshots)
-                {
-                    ConfigNode node = new ConfigNode("PART");
-                    snapShot.Save(node);
-                    partNodesL.Add(node);
-                }
-                ConfigNode[] partNodes = partNodesL.ToArray();
-                ConfigNode[] additionalNodes = new ConfigNode[0];
-
-                // This will actually create the ship and add it to the global list of flights:
-                ConfigNode protoVesselNode = ProtoVessel.CreateVesselNode(shipName, VesselType.Ship, orbit, 0, partNodes, additionalNodes);
-                ProtoVessel pv = HighLogic.CurrentGame.AddVessel(protoVesselNode);
-                Debug.Log("[KSTS] deployed new ship '" + shipName.ToString() + "' as '" + pv.vesselRef.id.ToString() + "'");
-                ScreenMessages.PostScreenMessage("Vessel '" + shipName.ToString() + "' deployed"); // Popup message to notify the player
-                Vessel newVessel = FlightGlobals.Vessels.Find(x => x.id == pv.vesselID);
-                
-                // While each part knows in which stage they are, the vessel has to know how many stages there are in total:
-                newVessel.protoVessel.stage = maxStageOffset + 1; // an offest of 0 would mean that there is only one stage
-
-                // Maybe add the initial crew to the vessel:
-                if (crewToDeliver != null && crewToDeliver.Count > 0 && newVessel != null)
-                {
-                    foreach (string kerbonautName in crewToDeliver) TargetVessel.AddCrewMember(newVessel, kerbonautName);
-                }
+                var game = FlightDriver.FlightStateCache ?? HighLogic.CurrentGame;
+                var profile = GetProfile();
+                var duration = profile.missionDuration;
+                AssembleForLaunchUnlanded(shipConstruct, crewToDeliver ?? Enumerable.Empty<string>(), duration, orbit, flagURL, game);
+                var newVessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
+                newVessel.vesselName = shipName;
+                Debug.Log("[KSTS] deployed new ship '" + shipName + "' as '" + newVessel.protoVessel.vesselRef.id + "'");
+                ScreenMessages.PostScreenMessage("Vessel '" + shipName + "' deployed"); // Popup message to notify the player
 
                 // Notify other mods about the new vessel:
                 GameEvents.onVesselCreate.Fire(newVessel);
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] Mission.CreateShip(): " + e.ToString());
+                Debug.LogError("[KSTS] Mission.CreateShip(): " + e);
             }
         }
 
         // Generates a description for displaying on the GUI:
         public string GetDescription()
         {
-            string description = "<color=#F9FA86><b>" + profileName + "</b></color> <color=#FFFFFF>(" + GetMissionTypeName(missionType) + ")\n";
+            var description = "<color=#F9FA86><b>" + profileName + "</b></color> <color=#FFFFFF>(" + GetMissionTypeName(missionType) + ")\n";
 
-            ShipTemplate shipTemplate = GetShipTemplate();
-            if (shipTemplate != null) description += "<b>Ship:</b> " + shipName + " (" + shipTemplate.shipName.ToString() + ")\n";
-            if (orbit != null) description += "<b>Orbit:</b> " + orbit.referenceBody.bodyName.ToString() + " @ " + GUI.FormatAltitude(orbit.semiMajorAxis - orbit.referenceBody.Radius) + "\n";
+            var shipTemplate = GetShipTemplate();
+            if (shipTemplate != null)
+            {
+                description += "<b>Ship:</b> " + shipName + " (" + shipTemplate.shipName.ToString() + ")\n";
+            }
+
+            if (orbit != null)
+            {
+                description += "<b>Orbit:</b> " + orbit.referenceBody.bodyName.ToString() + " @ " + GUI.FormatAltitude(orbit.semiMajorAxis - orbit.referenceBody.Radius) + "\n";
+            }
 
             // Display the targeted vessel (transport- and construction-missions):
             Vessel targetVessel = null;
@@ -390,9 +453,13 @@ namespace KSTS
             if (resourcesToDeliver != null)
             {
                 double totalMass = 0;
-                foreach (KeyValuePair<string, double> item in resourcesToDeliver)
+                foreach (var item in resourcesToDeliver)
                 {
-                    if (!KSTS.resourceDictionary.ContainsKey(item.Key)) continue;
+                    if (!KSTS.resourceDictionary.ContainsKey(item.Key))
+                    {
+                        continue;
+                    }
+
                     totalMass += KSTS.resourceDictionary[item.Key].density * item.Value;
                 }
                 description += "<b>Cargo:</b> " + totalMass.ToString("#,##0.00t") + "\n";
@@ -401,7 +468,7 @@ namespace KSTS
             // Display the crew-members we are transporting and collection:
             if (crewToDeliver != null && crewToDeliver.Count > 0)
             {
-                description += "<b>Crew-Transfer (Outbound):</b> " + String.Join(", ", crewToDeliver.ToArray()).Replace(" Kerman","") + "\n";
+                description += "<b>Crew-Transfer (Outbound):</b> " + String.Join(", ", crewToDeliver.ToArray()).Replace(" Kerman", "") + "\n";
             }
             if (crewToCollect != null && crewToCollect.Count > 0)
             {
@@ -409,12 +476,20 @@ namespace KSTS
             }
 
             // Display the remaining time:
-            double remainingTime = eta - Planetarium.GetUniversalTime();
-            if (remainingTime < 0) remainingTime = 0;
-            int etaColorComponent = 0xFF;
-            if (remainingTime <= 300) etaColorComponent = (int)Math.Round((0xFF / 300.0) * remainingTime); // Starting at 5 minutes, start turning the ETA green.
-            string etaColor = "#" + etaColorComponent.ToString("X2") + "FF" + etaColorComponent.ToString("X2");
-            description += "<color="+etaColor+"><b>ETA:</b> " + GUI.FormatDuration(remainingTime)+"</color>";
+            var remainingTime = eta - Planetarium.GetUniversalTime();
+            if (remainingTime < 0)
+            {
+                remainingTime = 0;
+            }
+
+            var etaColorComponent = 0xFF;
+            if (remainingTime <= 300)
+            {
+                etaColorComponent = (int)Math.Round((0xFF / 300.0) * remainingTime); // Starting at 5 minutes, start turning the ETA green.
+            }
+
+            var etaColor = "#" + etaColorComponent.ToString("X2") + "FF" + etaColorComponent.ToString("X2");
+            description += "<color=" + etaColor + "><b>ETA:</b> " + GUI.FormatDuration(remainingTime) + "</color>";
 
             description += "</color>";
             return description;
@@ -422,7 +497,7 @@ namespace KSTS
     }
 
     // Recorded mission-profile for a flight:
-    public enum MissionProfileType { DEPLOY=1, TRANSPORT=2 };
+    public enum MissionProfileType { DEPLOY = 1, TRANSPORT = 2 };
     public class MissionProfile : Saveable
     {
         public string profileName = "";
@@ -441,41 +516,55 @@ namespace KSTS
 
         public static string GetMissionProfileTypeName(MissionProfileType type)
         {
-            if (type == MissionProfileType.DEPLOY) return "deployment";
-            if (type == MissionProfileType.TRANSPORT) return "transport";
+            if (type == MissionProfileType.DEPLOY)
+            {
+                return "deployment";
+            }
+
+            if (type == MissionProfileType.TRANSPORT)
+            {
+                return "transport";
+            }
+
             return "N/A";
         }
 
         public static MissionProfile CreateFromConfigNode(ConfigNode node)
         {
-            MissionProfile missionProfile = new MissionProfile();
+            var missionProfile = new MissionProfile();
             return (MissionProfile)CreateFromConfigNode(node, missionProfile);
         }
 
         public static MissionProfile CreateFromRecording(Vessel vessel, FlightRecording recording)
         {
-            MissionProfile profile = new MissionProfile();
-            
-            profile.profileName     = recording.profileName;
-            profile.vesselName      = vessel.vesselName.ToString();
-            profile.missionType     = recording.missionType;
-            profile.launchCost      = recording.launchCost;
-            profile.launchMass      = recording.launchMass - recording.payloadMass;
-            profile.payloadMass     = recording.payloadMass;
-            profile.minAltitude     = recording.minAltitude;
-            profile.maxAltitude     = recording.maxAltitude;
-            profile.bodyName        = recording.launchBodyName;
+            var profile = new MissionProfile();
+
+            profile.profileName = recording.profileName;
+            profile.vesselName = vessel.vesselName.ToString();
+            profile.missionType = recording.missionType;
+            profile.launchCost = recording.launchCost;
+            profile.launchMass = recording.launchMass - recording.payloadMass;
+            profile.payloadMass = recording.payloadMass;
+            profile.minAltitude = recording.minAltitude;
+            profile.maxAltitude = recording.maxAltitude;
+            profile.bodyName = recording.launchBodyName;
             profile.missionDuration = recording.deploymentTime - recording.startTime;
-            profile.crewCapacity    = vessel.GetCrewCapacity() - vessel.GetCrewCount(); // Capacity at the end of the mission, so we can use it for oneway- as well als return-trips.
+            profile.crewCapacity = vessel.GetCrewCapacity() - vessel.GetCrewCount(); // Capacity at the end of the mission, so we can use it for oneway- as well als return-trips.
             profile.dockingPortTypes = recording.dockingPortTypes;
 
             if (vessel.situation == Vessel.Situations.LANDED || vessel.situation == Vessel.Situations.SPLASHED)
             {
                 profile.oneWayMission = false;
                 profile.launchCost -= recording.GetCurrentVesselValue();
-                if (profile.launchCost < 0) profile.launchCost = 0; // Shouldn't happen
+                if (profile.launchCost < 0)
+                {
+                    profile.launchCost = 0; // Shouldn't happen
+                }
             }
-            else profile.oneWayMission = true;
+            else
+            {
+                profile.oneWayMission = true;
+            }
 
             return profile;
         }
@@ -488,25 +577,46 @@ namespace KSTS
 
         public static void Initialize()
         {
-            if (MissionController.missionProfiles == null) MissionController.missionProfiles = new Dictionary<string, MissionProfile>();
-            if (MissionController.missions == null) MissionController.missions = new List<Mission>();
+            if (MissionController.missionProfiles == null)
+            {
+                MissionController.missionProfiles = new Dictionary<string, MissionProfile>();
+            }
+
+            if (MissionController.missions == null)
+            {
+                MissionController.missions = new List<Mission>();
+            }
         }
 
         private static string GetUniqueProfileName(string name)
         {
             name = name.Trim();
-            if (name == "") name = "KSTS";
+            if (name == "")
+            {
+                name = "KSTS";
+            }
 
             string[] postfixes = { "Alpha", "Beta", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Omega" };
-            int postfixNumber = 0;
-            string uniqueName = name;
-            bool lowercase = name.ToLower() == name; // If the name is in all lowercase, we don't want to break it by adding uppercase letters
+            var postfixNumber = 0;
+            var uniqueName = name;
+            var lowercase = name.ToLower() == name; // If the name is in all lowercase, we don't want to break it by adding uppercase letters
             while (MissionController.missionProfiles.ContainsKey(uniqueName))
             {
                 uniqueName = name + " ";
-                if (postfixNumber >= postfixes.Length) uniqueName += postfixNumber.ToString();
-                else uniqueName += postfixes[postfixNumber];
-                if (lowercase) uniqueName = uniqueName.ToLower();
+                if (postfixNumber >= postfixes.Length)
+                {
+                    uniqueName += postfixNumber.ToString();
+                }
+                else
+                {
+                    uniqueName += postfixes[postfixNumber];
+                }
+
+                if (lowercase)
+                {
+                    uniqueName = uniqueName.ToLower();
+                }
+
                 postfixNumber++;
             }
             return uniqueName;
@@ -514,7 +624,7 @@ namespace KSTS
 
         public static void CreateMissionProfile(Vessel vessel, FlightRecording recording)
         {
-            MissionProfile profile = MissionProfile.CreateFromRecording(vessel, recording);
+            var profile = MissionProfile.CreateFromRecording(vessel, recording);
 
             // Make the profile-name unique to use it as a key:
             profile.profileName = MissionController.GetUniqueProfileName(profile.profileName);
@@ -526,7 +636,7 @@ namespace KSTS
         public static void DeleteMissionProfile(string name)
         {
             // Abort all running missions of this profile:
-            int cancelledMission = missions.RemoveAll(x => x.profileName == name);
+            var cancelledMission = missions.RemoveAll(x => x.profileName == name);
             if (cancelledMission > 0)
             {
                 Debug.Log("[KSTS] cancelled " + cancelledMission.ToString() + " missions due to profile-deletion");
@@ -534,13 +644,20 @@ namespace KSTS
             }
 
             // Remove the profile:
-            if (MissionController.missionProfiles.ContainsKey(name)) MissionController.missionProfiles.Remove(name);
+            if (MissionController.missionProfiles.ContainsKey(name))
+            {
+                MissionController.missionProfiles.Remove(name);
+            }
         }
 
         public static void ChangeMissionProfileName(string name, string newName)
         {
             MissionProfile profile = null;
-            if (!MissionController.missionProfiles.TryGetValue(name, out profile)) return;
+            if (!MissionController.missionProfiles.TryGetValue(name, out profile))
+            {
+                return;
+            }
+
             MissionController.missionProfiles.Remove(name);
             profile.profileName = MissionController.GetUniqueProfileName(newName);
             MissionController.missionProfiles.Add(profile.profileName, profile);
@@ -549,21 +666,21 @@ namespace KSTS
         public static void LoadMissions(ConfigNode node)
         {
             MissionController.missionProfiles.Clear();
-            ConfigNode missionProfilesNode = node.GetNode("MissionProfiles");
+            var missionProfilesNode = node.GetNode("MissionProfiles");
             if (missionProfilesNode != null)
             {
-                foreach (ConfigNode missionProfileNode in missionProfilesNode.GetNodes())
+                foreach (var missionProfileNode in missionProfilesNode.GetNodes())
                 {
-                    MissionProfile missionProfile = MissionProfile.CreateFromConfigNode(missionProfileNode);
+                    var missionProfile = MissionProfile.CreateFromConfigNode(missionProfileNode);
                     MissionController.missionProfiles.Add(missionProfile.profileName, missionProfile);
                 }
             }
 
             MissionController.missions.Clear();
-            ConfigNode missionsNode = node.GetNode("Missions");
+            var missionsNode = node.GetNode("Missions");
             if (missionsNode != null)
             {
-                foreach (ConfigNode missionNode in missionsNode.GetNodes())
+                foreach (var missionNode in missionsNode.GetNodes())
                 {
                     MissionController.missions.Add(Mission.CreateFromConfigNode(missionNode));
                 }
@@ -572,14 +689,14 @@ namespace KSTS
 
         public static void SaveMissions(ConfigNode node)
         {
-            ConfigNode missionProfilesNode = node.AddNode("MissionProfiles");
-            foreach (KeyValuePair<string, MissionProfile> item in MissionController.missionProfiles)
+            var missionProfilesNode = node.AddNode("MissionProfiles");
+            foreach (var item in MissionController.missionProfiles)
             {
                 missionProfilesNode.AddNode(item.Value.CreateConfigNode("MissionProfile"));
             }
 
-            ConfigNode missionsNode = node.AddNode("Missions");
-            foreach (Mission mission in MissionController.missions)
+            var missionsNode = node.AddNode("Missions");
+            foreach (var mission in MissionController.missions)
             {
                 missionsNode.AddNode(mission.CreateConfigNode("Mission"));
             }
@@ -593,10 +710,17 @@ namespace KSTS
         // Returns the mission (if any), the given kerbal is assigned to:
         public static Mission GetKerbonautsMission(string kerbonautName)
         {
-            foreach (Mission mission in missions)
+            foreach (var mission in missions)
             {
-                if (mission.crewToDeliver != null && mission.crewToDeliver.Contains(kerbonautName)) return mission;
-                if (mission.crewToCollect != null && mission.crewToCollect.Contains(kerbonautName)) return mission;
+                if (mission.crewToDeliver != null && mission.crewToDeliver.Contains(kerbonautName))
+                {
+                    return mission;
+                }
+
+                if (mission.crewToCollect != null && mission.crewToCollect.Contains(kerbonautName))
+                {
+                    return mission;
+                }
             }
             return null;
         }
@@ -606,13 +730,16 @@ namespace KSTS
         {
             try
             {
-                double now = Planetarium.GetUniversalTime();
-                List<Mission> toExecute = new List<Mission>();
-                foreach (Mission mission in missions)
+                var now = Planetarium.GetUniversalTime();
+                var toExecute = new List<Mission>();
+                foreach (var mission in missions)
                 {
-                    if (mission.eta <= now) toExecute.Add(mission);
+                    if (mission.eta <= now)
+                    {
+                        toExecute.Add(mission);
+                    }
                 }
-                foreach (Mission mission in toExecute)
+                foreach (var mission in toExecute)
                 {
                     try
                     {

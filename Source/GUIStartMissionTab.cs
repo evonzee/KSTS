@@ -12,8 +12,8 @@ namespace KSTS
         // Displays the footer with the current cost and maybe an "execute"-button; returns true, if that button was pressed:
         protected static bool DisplayFooter(double cost, bool displayButton)
         {
-            double currentFunds = KSTS.GetFunds();
-            string fundsColor = "#B3D355"; // Green
+            var currentFunds = KSTS.GetFunds();
+            var fundsColor = "#B3D355"; // Green
             if (cost > currentFunds) fundsColor = "#D35555"; // Red
 
             GUILayout.BeginHorizontal();
@@ -105,7 +105,7 @@ namespace KSTS
             orbitEditor.DisplayEditor();
 
             // Display crew-selector, if the payload can hold kerbals:
-            bool selectionIsValid = true;
+            var selectionIsValid = true;
             if (payloadShipSelector.payload.GetCrewCapacity() > 0)
             {
                 GUILayout.Label("");
@@ -124,8 +124,8 @@ namespace KSTS
         public static bool Display()
         {
             currentCost = 0;
-            bool ready = DisplayInner();
-            bool launch = DisplayFooter(currentCost, ready);
+            var ready = DisplayInner();
+            var launch = DisplayFooter(currentCost, ready);
             if (launch)
             {
                 // Start the mission:
@@ -201,7 +201,7 @@ namespace KSTS
             if (payloadResourceSelector.selectedResources != null)
             {
                 // Determine the cost of the selected resources:
-                foreach (PayloadResource payloadResource in payloadResourceSelector.selectedResources)
+                foreach (var payloadResource in payloadResourceSelector.selectedResources)
                 {
                     currentCost += KSTS.resourceDictionary[payloadResource.name].unitCost * payloadResource.amount;
                 }
@@ -214,8 +214,8 @@ namespace KSTS
         public static bool Display()
         {
             currentCost = 0;
-            bool ready = DisplayInner();
-            bool launch = DisplayFooter(currentCost, ready);
+            var ready = DisplayInner();
+            var launch = DisplayFooter(currentCost, ready);
             if (launch)
             {
                 MissionController.StartMission(Mission.CreateTransport(
@@ -274,9 +274,9 @@ namespace KSTS
                 return false;
             }
             currentCost += payloadShipSelector.payload.template.totalCost;
-            double dryMass = payloadShipSelector.payload.GetDryMass();
+            var dryMass = payloadShipSelector.payload.GetDryMass();
             double totalMass = payloadShipSelector.payload.template.totalMass;
-            int engineersRequired = (int) Math.Ceiling( Math.Log(Math.Ceiling(dryMass / 10)) / Math.Log(2) ) + 1; // One engineer can construct up to 10t, each additional engineer doubles that number
+            var engineersRequired = (int) Math.Ceiling( Math.Log(Math.Ceiling(dryMass / 10)) / Math.Log(2) ) + 1; // One engineer can construct up to 10t, each additional engineer doubles that number
 
             // Target (space-dock) selection:
             if (targetVesselSelector == null)
@@ -334,23 +334,23 @@ namespace KSTS
             GUILayout.EndHorizontal();
 
             // Calculate and display all the construction-parameters:
-            int engineers = TargetVessel.GetCrewCountWithTrait(targetVesselSelector.targetVessel, "Engineer");
-            int scientists = TargetVessel.GetCrewCountWithTrait(targetVesselSelector.targetVessel, "Scientist");
+            var engineers = TargetVessel.GetCrewCountWithTrait(targetVesselSelector.targetVessel, "Engineer");
+            var scientists = TargetVessel.GetCrewCountWithTrait(targetVesselSelector.targetVessel, "Scientist");
             if (engineers < engineersRequired) throw new Exception("not enough engineers on target vessel");
             if (missionProfileSelector.selectedProfile.payloadMass <= 0) throw new Exception("mission profile payload too low");
-            int flights = (int) Math.Ceiling(totalMass / missionProfileSelector.selectedProfile.payloadMass);
-            double flightTime = missionProfileSelector.selectedProfile.missionDuration;
-            double totalFlightTime = flightTime * flights;
-            double baseConstructionTime = dryMass * 6 * 60 * 60; // 1 (kerbin-) day / ton
-            double totalFlightCost = missionProfileSelector.selectedProfile.launchCost * flights;
+            var flights = (int) Math.Ceiling(totalMass / missionProfileSelector.selectedProfile.payloadMass);
+            var flightTime = missionProfileSelector.selectedProfile.missionDuration;
+            var totalFlightTime = flightTime * flights;
+            var baseConstructionTime = dryMass * 6 * 60 * 60; // 1 (kerbin-) day / ton
+            var totalFlightCost = missionProfileSelector.selectedProfile.launchCost * flights;
 
             currentCost += totalFlightCost;
             constructionTime = baseConstructionTime;
             if (scientists > 0) constructionTime = baseConstructionTime / (scientists + 1); // half the time per scientist
             if (totalFlightTime > constructionTime) constructionTime = totalFlightTime;
 
-            GUIStyle leftLabel = new GUIStyle(GUI.labelStyle) { stretchWidth = true };
-            GUIStyle rightLabel = new GUIStyle(GUI.labelStyle) { stretchWidth = false, alignment = TextAnchor.MiddleRight };
+            var leftLabel = new GUIStyle(GUI.labelStyle) { stretchWidth = true };
+            var rightLabel = new GUIStyle(GUI.labelStyle) { stretchWidth = false, alignment = TextAnchor.MiddleRight };
             GUILayout.BeginHorizontal();
             GUILayout.Label("Mass:", leftLabel);
             GUILayout.Label(totalMass.ToString("#,##0.00t") + " / " + dryMass.ToString("#,##0.00t") + " dry", rightLabel);
@@ -382,7 +382,7 @@ namespace KSTS
             GUILayout.EndHorizontal();
 
             // Display crew-selector, if the new ship can hold kerbals:
-            bool selectionIsValid = true;
+            var selectionIsValid = true;
             if (payloadShipSelector.payload.GetCrewCapacity() > 0)
             {
                 GUILayout.Label("");
@@ -401,8 +401,8 @@ namespace KSTS
         public static bool Display()
         {
             currentCost = 0;
-            bool ready = DisplayInner();
-            bool launch = DisplayFooter(currentCost, ready);
+            var ready = DisplayInner();
+            var launch = DisplayFooter(currentCost, ready);
             if (launch)
             {
                 // Start the mission:

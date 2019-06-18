@@ -40,7 +40,7 @@ namespace KSTS
             GUILayout.BeginHorizontal();
             GUILayout.Label("<size=14><b>Mission Profile:</b></size>", new GUIStyle(GUI.labelStyle) { stretchWidth = true });
 
-            string details = "N/A";
+            var details = "N/A";
             if (showDetails == SELECTED_DETAILS_ALTITUDE) details = "Max Altitude: " + GUI.FormatAltitude(selectedProfile.maxAltitude);
             else if (showDetails == SELECTED_DETAILS_PAYLOAD) details = "Max Payload: " + this.selectedProfile.payloadMass.ToString("0.00t");
             if (GUILayout.Button("<size=14><color=#F9FA86><b>" + this.selectedProfile.profileName + "</b></color> ("+details+")</size>", new GUIStyle(GUI.buttonStyle) { alignment = TextAnchor.MiddleRight, stretchWidth = false, fixedWidth = 320 }))
@@ -58,8 +58,8 @@ namespace KSTS
             CheckInternals();
             GUILayout.Label("<size=14><b>Mission Profile:</b></size>");
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUI.scrollStyle);
-            string green = "#00FF00";
-            string red = "#FF0000";
+            var green = "#00FF00";
+            var red = "#FF0000";
 
             // Show a list with all possible mission-profiles:
             if (MissionController.missionProfiles.Values.Count == 0)
@@ -68,20 +68,20 @@ namespace KSTS
             }
             else
             {
-                List<GUIContent> contents = new List<GUIContent>();
-                List<int> invalidIndices = new List<int>(); // Profiles which fall out of the defined filters will get noted here.
-                int index = 0;
-                foreach (MissionProfile missionProfile in MissionController.missionProfiles.Values)
+                var contents = new List<GUIContent>();
+                var invalidIndices = new List<int>(); // Profiles which fall out of the defined filters will get noted here.
+                var index = 0;
+                foreach (var missionProfile in MissionController.missionProfiles.Values)
                 {
-                    bool isValidProfile = true;
-                    string color = "";
+                    var isValidProfile = true;
+                    var color = "";
 
                     // Build the descriptive text with highlighting:
-                    string description = "<color=#F9FA86><b>" + missionProfile.profileName + "</b></color> <color=#FFFFFF>(" + missionProfile.vesselName + ")\n";
+                    var description = "<color=#F9FA86><b>" + missionProfile.profileName + "</b></color> <color=#FFFFFF>(" + missionProfile.vesselName + ")\n";
                     description += "<b>Mass:</b> " + missionProfile.launchMass.ToString("0.0t") + ", Cost: " + missionProfile.launchCost.ToString("#,##0√") + ", ";
 
                     // One-Way or Round-Trip:
-                    string missionRouteDetails = "";
+                    var missionRouteDetails = "";
                     if (missionProfile.oneWayMission) missionRouteDetails = "one-way";
                     else missionRouteDetails = "round-trip";
                     if (this.filterRoundTrip != null)
@@ -93,7 +93,7 @@ namespace KSTS
                     description += missionRouteDetails + "\n";
 
                     // Mission-Type:
-                    string missionType = MissionProfile.GetMissionProfileTypeName(missionProfile.missionType);
+                    var missionType = MissionProfile.GetMissionProfileTypeName(missionProfile.missionType);
                     if (this.filterMissionType != null)
                     {
                         if (this.filterMissionType != missionProfile.missionType) { isValidProfile = false; color = red; }
@@ -105,14 +105,14 @@ namespace KSTS
                     description += "<b>Duration:</b> " + GUI.FormatDuration(missionProfile.missionDuration) + "\n";
 
                     // Docking-Ports:
-                    string dockingPorts = "";
+                    var dockingPorts = "";
                     if (missionProfile.missionType == MissionProfileType.TRANSPORT || this.filterDockingPortTypes != null)
                     {
-                        bool hasFittingPort = false;
-                        int portNumber = 0;
+                        var hasFittingPort = false;
+                        var portNumber = 0;
                         if (missionProfile.dockingPortTypes != null)
                         {
-                            foreach (string portType in missionProfile.dockingPortTypes)
+                            foreach (var portType in missionProfile.dockingPortTypes)
                             {
                                 if (portNumber > 0) dockingPorts += ", ";
                                 if (this.filterDockingPortTypes != null && this.filterDockingPortTypes.Contains(portType))
@@ -134,7 +134,7 @@ namespace KSTS
                     if (dockingPorts != "") description += "<b>Docking-Ports:</b> " + dockingPorts + "\n";
 
                     // Payload:
-                    string payloadMass = missionProfile.payloadMass.ToString("0.0t");
+                    var payloadMass = missionProfile.payloadMass.ToString("0.0t");
                     if (this.filterMass != null)
                     {
                         // We only display one digit after the pount, so we should round here to avoid confustion:
@@ -145,7 +145,7 @@ namespace KSTS
                     description += "<b>Payload:</b> " + payloadMass;
 
                     // Body:
-                    string bodyName = missionProfile.bodyName;
+                    var bodyName = missionProfile.bodyName;
                     if (this.filterBody != null)
                     {
                         if (this.filterBody.bodyName != missionProfile.bodyName) { isValidProfile = false; color = red; }
@@ -155,7 +155,7 @@ namespace KSTS
                     description += " to " + bodyName;
 
                     // Altitude:
-                    string maxAltitude = GUI.FormatAltitude(missionProfile.maxAltitude);
+                    var maxAltitude = GUI.FormatAltitude(missionProfile.maxAltitude);
                     if (this.filterAltitude != null)
                     {
                         if (this.filterAltitude > missionProfile.maxAltitude) { isValidProfile = false; color = red; }
@@ -165,7 +165,7 @@ namespace KSTS
                     description += " @ " + maxAltitude + "\n";
 
                     // Crew-Capacity:
-                    string crewCapacity = missionProfile.crewCapacity.ToString("0");
+                    var crewCapacity = missionProfile.crewCapacity.ToString("0");
                     if (this.filterCrewCapacity != null)
                     {
                         if (this.filterCrewCapacity > missionProfile.crewCapacity) { isValidProfile = false; color = red; }
@@ -181,7 +181,7 @@ namespace KSTS
                     index++;
                 }
 
-                int newSelection = GUILayout.SelectionGrid(selectedIndex, contents.ToArray(), 1, GUI.selectionGridStyle);
+                var newSelection = GUILayout.SelectionGrid(selectedIndex, contents.ToArray(), 1, GUI.selectionGridStyle);
                 if (newSelection != selectedIndex && !invalidIndices.Contains(newSelection))
                 {
                     selectedIndex = newSelection;

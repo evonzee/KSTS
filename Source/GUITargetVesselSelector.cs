@@ -35,12 +35,12 @@ namespace KSTS
         {
             GUILayout.Label("<size=14><b>Target:</b></size>");
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUI.scrollStyle);
-            string green = "#00FF00";
-            string red = "#FF0000";
+            var green = "#00FF00";
+            var red = "#FF0000";
 
             // Build a list with all valid vessels:
-            List<Vessel> validTargets = new List<Vessel>();
-            foreach (Vessel vessel in FlightGlobals.Vessels)
+            var validTargets = new List<Vessel>();
+            foreach (var vessel in FlightGlobals.Vessels)
             {
                 if (!TargetVessel.IsValidTarget(vessel)) continue;
                 validTargets.Add(vessel);
@@ -59,49 +59,49 @@ namespace KSTS
             else
             {
                 // Show list with all possible vessels:
-                List<GUIContent> contents = new List<GUIContent>();
-                List<int> filteredIndices = new List<int>(); // Target-vessels which fall out of the defined filters will get noted here.
-                int index = 0;
-                foreach (Vessel vessel in validTargets)
+                var contents = new List<GUIContent>();
+                var filteredIndices = new List<int>(); // Target-vessels which fall out of the defined filters will get noted here.
+                var index = 0;
+                foreach (var vessel in validTargets)
                 {
-                    bool filterThisTarget = false;
+                    var filterThisTarget = false;
                     if (!TargetVessel.IsValidTarget(vessel)) continue;
-                    List<string> descriptions = new List<string>();
+                    var descriptions = new List<string>();
                     descriptions.Add("<color=#F9FA86><b>" + vessel.vesselName + "</b></color><color=#FFFFFF>");
 
                     // Orbital-Parameters:
                     descriptions.Add("<b>Apoapsis:</b> " + GUI.FormatAltitude(vessel.orbit.ApA) + ", <b>Periapsis:</b> " + GUI.FormatAltitude(vessel.orbit.PeA) + ", <b>MET:</b> " + GUI.FormatDuration(vessel.missionTime));
 
                     // Docking-Port Types:
-                    List<string> dockingPortsTranslated = new List<string>();
-                    foreach (string dockingPortType in TargetVessel.GetVesselDockingPortTypes(vessel)) dockingPortsTranslated.Add(TargetVessel.TranslateDockingPortName(dockingPortType));
+                    var dockingPortsTranslated = new List<string>();
+                    foreach (var dockingPortType in TargetVessel.GetVesselDockingPortTypes(vessel)) dockingPortsTranslated.Add(TargetVessel.TranslateDockingPortName(dockingPortType));
                     if (dockingPortsTranslated.Count > 0) descriptions.Add("<b>Docking-Ports:</b> " + string.Join(", ", dockingPortsTranslated.ToArray()));
 
                     // Resources:
                     double capacity = 0;
-                    foreach(PayloadResource availableResource in TargetVessel.GetFreeResourcesCapacities(vessel)) capacity += availableResource.amount * availableResource.mass;
+                    foreach(var availableResource in TargetVessel.GetFreeResourcesCapacities(vessel)) capacity += availableResource.amount * availableResource.mass;
                     if (capacity > 0) descriptions.Add("<b>Resource Capacity:</b> " + capacity.ToString("#,##0.00t"));
 
                     // Crew:
-                    int seats = TargetVessel.GetCrewCapacity(vessel);
-                    int crew = TargetVessel.GetCrew(vessel).Count;
+                    var seats = TargetVessel.GetCrewCapacity(vessel);
+                    var crew = TargetVessel.GetCrew(vessel).Count;
                     if (seats > 0) descriptions.Add("<b>Crew:</b> " + crew.ToString() + "/" + seats.ToString());
 
                     // Maybe apply additional filters and show their attributes:
-                    List<string> filterAttributes = new List<string>(); ;
+                    var filterAttributes = new List<string>(); ;
                     if (filterVesselType != null)
                     {
-                        bool isValidType = vessel.vesselType == (VesselType)filterVesselType;
-                        string color = isValidType ? green : red;
+                        var isValidType = vessel.vesselType == (VesselType)filterVesselType;
+                        var color = isValidType ? green : red;
                         filterAttributes.Add("<b>Type:</b> <color=" + color + ">" + vessel.vesselType.ToString() + "</color>");
                         if (!isValidType) filterThisTarget = true;
                     }
                     if (filterHasCrewTrait != null)
                     {
-                        int traitCount = TargetVessel.GetCrewCountWithTrait(vessel, filterHasCrewTrait);
-                        int requiredCount = 1;
+                        var traitCount = TargetVessel.GetCrewCountWithTrait(vessel, filterHasCrewTrait);
+                        var requiredCount = 1;
                         if (filterHasCrewTraitCount != null) requiredCount = (int) filterHasCrewTraitCount;
-                        string color = traitCount >= requiredCount ? green : red;
+                        var color = traitCount >= requiredCount ? green : red;
                         filterAttributes.Add("<b>" + filterHasCrewTrait + "s:</b> <color=" + color + ">" + traitCount.ToString() + "/"+ requiredCount.ToString() + "</color>");
                         if (traitCount < requiredCount) filterThisTarget = true;
                     }
@@ -112,7 +112,7 @@ namespace KSTS
                     index++;
                 }
 
-                int newSelection = GUILayout.SelectionGrid(selectedIndex, contents.ToArray(), 1, GUI.selectionGridStyle);
+                var newSelection = GUILayout.SelectionGrid(selectedIndex, contents.ToArray(), 1, GUI.selectionGridStyle);
                 if (newSelection >= 0 && !filteredIndices.Contains(newSelection))
                 {
                     // The player has selected a payload:

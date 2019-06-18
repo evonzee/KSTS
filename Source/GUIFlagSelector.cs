@@ -69,7 +69,7 @@ namespace KSTS
         {
             GUILayout.Label("<size=14><b>Mission-Flag:</b></size>", GUI.labelStyle);
 
-            bool pressed = false;
+            var pressed = false;
             if (flagIcon != null)
             {
                 pressed = GUILayout.Button(flagIcon, new GUIStyle(GUI.buttonStyle) { stretchWidth = false });

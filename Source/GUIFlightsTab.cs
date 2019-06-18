@@ -18,11 +18,11 @@ namespace KSTS
             }
             else
             {
-                List<GUIContent> contents = new List<GUIContent>();
+                var contents = new List<GUIContent>();
                 MissionController.missions.Sort((x, y) => x.eta.CompareTo(y.eta)); // Sort list by ETA
-                foreach (Mission mission in MissionController.missions)
+                foreach (var mission in MissionController.missions)
                 {
-                    string missionVesselName = "";
+                    var missionVesselName = "";
                     if (mission.GetProfile() != null) missionVesselName = mission.GetProfile().vesselName;
                     contents.Add(new GUIContent(mission.GetDescription(), GUI.GetVesselThumbnail(missionVesselName)));
                 }

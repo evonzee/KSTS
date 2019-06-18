@@ -32,9 +32,9 @@ namespace KSTS
             this.missionProfile = missionProfile;
             resourceSelectors = new List<GUIRichValueSelector>();
             availableResources = TargetVessel.GetFreeResourcesCapacities(targetVessel);
-            foreach (PayloadResource availablePayload in availableResources)
+            foreach (var availablePayload in availableResources)
             {
-                GUIRichValueSelector selector = new GUIRichValueSelector(availablePayload.name, 0, "", 0, Math.Round(availablePayload.amount,2), true, "#,##0.00");
+                var selector = new GUIRichValueSelector(availablePayload.name, 0, "", 0, Math.Round(availablePayload.amount,2), true, "#,##0.00");
                 resourceSelectors.Add(selector);
             }
             crewTransferSelector = new GUICrewTransferSelector(targetVessel, missionProfile);
@@ -45,7 +45,7 @@ namespace KSTS
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label("<size=14><b>Cargo:</b></size>");
-            string[] transportTypeStrings = new string[] { "Resources", "Crew" };
+            var transportTypeStrings = new string[] { "Resources", "Crew" };
             selectedTransportType = GUILayout.Toolbar(selectedTransportType, transportTypeStrings);
             GUILayout.EndHorizontal();
 
@@ -61,14 +61,14 @@ namespace KSTS
                 else
                 {
                     // Show list with all possible payloads:
-                    int index = 0;
+                    var index = 0;
                     double selectedMass = 0;
-                    List<PayloadResource> currentlySelectedPayloads = new List<PayloadResource>();
-                    foreach (GUIRichValueSelector selector in resourceSelectors)
+                    var currentlySelectedPayloads = new List<PayloadResource>();
+                    foreach (var selector in resourceSelectors)
                     {
                         selector.Display();
-                        PayloadResource resource = availableResources[index];
-                        PayloadResource selected = resource.Clone();
+                        var resource = availableResources[index];
+                        var selected = resource.Clone();
                         selected.amount = selector.Value;
                         currentlySelectedPayloads.Add(selected);
                         selectedMass += selected.amount * selected.mass;
@@ -76,7 +76,7 @@ namespace KSTS
                     }
 
                     // Show total selected amount:
-                    string textColor = "#00FF00";
+                    var textColor = "#00FF00";
                     if (selectedMass > missionProfile.payloadMass) textColor = "#FF0000";
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("<b>Selected Payload:</b>");
@@ -92,14 +92,14 @@ namespace KSTS
             {
                 // Transport Crew:
                 selectedResources = null;
-                bool validCrewSelection = crewTransferSelector.DisplayList();
+                var validCrewSelection = crewTransferSelector.DisplayList();
 
                 // If there is a valid selection, copy the selection:
                 if (validCrewSelection && ( crewTransferSelector.crewToDeliver.Count > 0 || crewTransferSelector.crewToCollect.Count > 0))
                 {
                     selectedCrewTransfers = new List<CrewTransferOrder>();
-                    foreach (string name in crewTransferSelector.crewToDeliver) selectedCrewTransfers.Add(new CrewTransferOrder() { kerbalName = name, direction = CrewTransferOrder.CrewTransferDirection.DELIVER });
-                    foreach (string name in crewTransferSelector.crewToCollect) selectedCrewTransfers.Add(new CrewTransferOrder() { kerbalName = name, direction = CrewTransferOrder.CrewTransferDirection.COLLECT });
+                    foreach (var name in crewTransferSelector.crewToDeliver) selectedCrewTransfers.Add(new CrewTransferOrder() { kerbalName = name, direction = CrewTransferOrder.CrewTransferDirection.DELIVER });
+                    foreach (var name in crewTransferSelector.crewToCollect) selectedCrewTransfers.Add(new CrewTransferOrder() { kerbalName = name, direction = CrewTransferOrder.CrewTransferDirection.COLLECT });
                 }
                 else
                 {

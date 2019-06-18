@@ -46,8 +46,8 @@ namespace KSTS
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUI.scrollStyle);
 
             // Show list with all possible payloads:
-            List<GUIContent> contents = new List<GUIContent>();
-            foreach (CachedShipTemplate ship in GUI.shipTemplates)
+            var contents = new List<GUIContent>();
+            foreach (var ship in GUI.shipTemplates)
             {
                 contents.Add(new GUIContent(
                     "<color=#F9FA86><b>" + ship.template.shipName + "</b></color>\n" +

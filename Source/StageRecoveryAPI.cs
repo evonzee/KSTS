@@ -44,7 +44,7 @@ namespace StageRecovery
             {
                 if (StageRecoveryAvailable)
                 {
-                    object SREnabledObject = GetMemberInfoValue(SRType.GetMember("SREnabled")[0], Instance);
+                    var SREnabledObject = GetMemberInfoValue(SRType.GetMember("SREnabled")[0], Instance);
                     return (bool)SREnabledObject;
                 }
                 else
@@ -64,16 +64,16 @@ namespace StageRecovery
          * and science returned; and a string representing the reason for failure (SUCCESS, SPEED, or BURNUP)*/
         public static void AddRecoverySuccessEvent(Action<Vessel, float[], string> method)
         {
-            object successList = GetMemberInfoValue(SRType.GetMember("RecoverySuccessEvent")[0], Instance);
-            MethodInfo addMethod = successList.GetType().GetMethod("Add");
+            var successList = GetMemberInfoValue(SRType.GetMember("RecoverySuccessEvent")[0], Instance);
+            var addMethod = successList.GetType().GetMethod("Add");
             addMethod.Invoke(successList, new object[] { method });
         }
 
         /* Removes a listener from the Recovery Success Event */
         public static void RemoveRecoverySuccessEvent(Action<Vessel, float[], string> method)
         {
-            object successList = GetMemberInfoValue(SRType.GetMember("RecoverySuccessEvent")[0], Instance);
-            MethodInfo removeMethod = successList.GetType().GetMethod("Remove");
+            var successList = GetMemberInfoValue(SRType.GetMember("RecoverySuccessEvent")[0], Instance);
+            var removeMethod = successList.GetType().GetMethod("Remove");
             removeMethod.Invoke(successList, new object[] { method });
         }
 
@@ -82,16 +82,16 @@ namespace StageRecovery
          * and science returned; and a string representing the reason for failure (SUCCESS, SPEED, or BURNUP)*/
         public static void AddRecoveryFailureEvent(Action<Vessel, float[], string> method)
         {
-            object failList = GetMemberInfoValue(SRType.GetMember("RecoveryFailureEvent")[0], Instance);
-            MethodInfo addMethod = failList.GetType().GetMethod("Add");
+            var failList = GetMemberInfoValue(SRType.GetMember("RecoveryFailureEvent")[0], Instance);
+            var addMethod = failList.GetType().GetMethod("Add");
             addMethod.Invoke(failList, new object[] { method });
         }
 
         /* Removes a listener from the Recovery Failure Event */
         public static void RemoveRecoveryFailureEvent(Action<Vessel, float[], string> method)
         {
-            object failList = GetMemberInfoValue(SRType.GetMember("RecoveryFailureEvent")[0], Instance);
-            MethodInfo removeMethod = failList.GetType().GetMethod("Remove");
+            var failList = GetMemberInfoValue(SRType.GetMember("RecoveryFailureEvent")[0], Instance);
+            var removeMethod = failList.GetType().GetMethod("Remove");
             removeMethod.Invoke(failList, new object[] { method });
         }
 
@@ -99,16 +99,16 @@ namespace StageRecovery
          * the event will fire before any serious processing occurs. */
         public static void AddRecoveryProcessingStartListener(Action<Vessel> method)
         {
-            object successList = GetMemberInfoValue(SRType.GetMember("OnRecoveryProcessingStart")[0], Instance);
-            MethodInfo addMethod = successList.GetType().GetMethod("Add");
+            var successList = GetMemberInfoValue(SRType.GetMember("OnRecoveryProcessingStart")[0], Instance);
+            var addMethod = successList.GetType().GetMethod("Add");
             addMethod.Invoke(successList, new object[] { method });
         }
 
         /* Removes a listener from the OnRecoveryProcessingStart Event */
         public static void RemoveRecoveryProcessingStartListener(Action<Vessel> method)
         {
-            object successList = GetMemberInfoValue(SRType.GetMember("OnRecoveryProcessingStart")[0], Instance);
-            MethodInfo removeMethod = successList.GetType().GetMethod("Remove");
+            var successList = GetMemberInfoValue(SRType.GetMember("OnRecoveryProcessingStart")[0], Instance);
+            var removeMethod = successList.GetType().GetMethod("Remove");
             removeMethod.Invoke(successList, new object[] { method });
         }
 
@@ -116,16 +116,16 @@ namespace StageRecovery
          * the event will fire before any serious processing occurs. */
         public static void AddRecoveryProcessingFinishListener(Action<Vessel> method)
         {
-            object successList = GetMemberInfoValue(SRType.GetMember("OnRecoveryProcessingFinish")[0], Instance);
-            MethodInfo addMethod = successList.GetType().GetMethod("Add");
+            var successList = GetMemberInfoValue(SRType.GetMember("OnRecoveryProcessingFinish")[0], Instance);
+            var addMethod = successList.GetType().GetMethod("Add");
             addMethod.Invoke(successList, new object[] { method });
         }
 
         /* Removes a listener from the OnRecoveryProcessingFinish Event */
         public static void RemoveRecoveryProcessingFinishListener(Action<Vessel> method)
         {
-            object successList = GetMemberInfoValue(SRType.GetMember("OnRecoveryProcessingFinish")[0], Instance);
-            MethodInfo removeMethod = successList.GetType().GetMethod("Remove");
+            var successList = GetMemberInfoValue(SRType.GetMember("OnRecoveryProcessingFinish")[0], Instance);
+            var removeMethod = successList.GetType().GetMethod("Remove");
             removeMethod.Invoke(successList, new object[] { method });
         }
 
@@ -136,8 +136,8 @@ namespace StageRecovery
         /// <returns>The terminal velocity as a scalar (speed)</returns>
         public static double ComputeTerminalVelocity(List<ProtoPartSnapshot> partList)
         {
-            MethodInfo computeMethod = SRType.GetMethod("ComputeTerminalVelocity_ProtoParts");
-            object result = computeMethod.Invoke(Instance, new object[] { partList });
+            var computeMethod = SRType.GetMethod("ComputeTerminalVelocity_ProtoParts");
+            var result = computeMethod.Invoke(Instance, new object[] { partList });
             if (result is double)
                 return (double)result;
             return double.MaxValue;
@@ -150,8 +150,8 @@ namespace StageRecovery
         /// <returns>The terminal velocity as a scalar (speed)</returns>
         public static double ComputeTerminalVelocity(List<Part> partList)
         {
-            MethodInfo computeMethod = SRType.GetMethod("ComputeTerminalVelocity_Parts");
-            object result = computeMethod.Invoke(Instance, new object[] { partList });
+            var computeMethod = SRType.GetMethod("ComputeTerminalVelocity_Parts");
+            var result = computeMethod.Invoke(Instance, new object[] { partList });
             if (result is double)
                 return (double)result;
             return double.MaxValue;

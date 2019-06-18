@@ -34,16 +34,16 @@ namespace KSTS
         // Returns a list of all kerbals on the crew-roster that can be transported:
         public static List<ProtoCrewMember> GetCrewRoster()
         {
-            List<ProtoCrewMember> roster = new List<ProtoCrewMember>();
-            foreach (ProtoCrewMember crewMember in HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Crew, ProtoCrewMember.RosterStatus.Available)) roster.Add(crewMember);
-            foreach (ProtoCrewMember crewMember in HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Tourist, ProtoCrewMember.RosterStatus.Available)) roster.Add(crewMember);
+            var roster = new List<ProtoCrewMember>();
+            foreach (var crewMember in HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Crew, ProtoCrewMember.RosterStatus.Available)) roster.Add(crewMember);
+            foreach (var crewMember in HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Tourist, ProtoCrewMember.RosterStatus.Available)) roster.Add(crewMember);
             return roster;
         }
 
         // Shows a list of all available crew-members which the player can choose to transport and returns true, if the selection is valid:
         public bool DisplayList()
         {
-            int targetCrewCapacity = 0;
+            var targetCrewCapacity = 0;
             if (targetVessel != null) targetCrewCapacity = TargetVessel.GetCrewCapacity(targetVessel);
             else if (targetTemplate != null) targetCrewCapacity = targetTemplate.GetCrewCapacity();
 
@@ -60,26 +60,26 @@ namespace KSTS
             else
             {
                 // Target-vessel summary:
-                bool targetOverload = false;
+                var targetOverload = false;
                 string headline;
                 if (targetVessel != null) // Existing vessel (in- & outboud transfers possible)
                 {
                     // Display capacity and transfer deltas:
-                    List<ProtoCrewMember> targetVesselCrew = TargetVessel.GetCrew(targetVessel);
+                    var targetVesselCrew = TargetVessel.GetCrew(targetVessel);
                     if (targetVesselCrew.Count + crewToDeliver.Count - crewToCollect.Count > targetCrewCapacity) targetOverload = true;
                     headline = "<b>" + targetVessel.vesselName + ":</b> " + targetVesselCrew.Count.ToString() + "/" + targetCrewCapacity.ToString();
-                    string transfers = " inbound: " + crewToDeliver.Count.ToString("+#;-#;0") + ", outbound: " + (-crewToCollect.Count).ToString("+#;-#;0");
+                    var transfers = " inbound: " + crewToDeliver.Count.ToString("+#;-#;0") + ", outbound: " + (-crewToCollect.Count).ToString("+#;-#;0");
                     if (targetOverload) transfers = "<color=#FF0000>" + transfers + "</color>";
                     GUILayout.Label(headline + transfers);
 
                     // Display Crew that is stationed on the target vessel:
-                    foreach (ProtoCrewMember kerbonaut in targetVesselCrew)
+                    foreach (var kerbonaut in targetVesselCrew)
                     {
-                        string details = " <b>" + kerbonaut.name + "</b> (Level " + kerbonaut.experienceLevel.ToString() + " " + kerbonaut.trait + ")";
+                        var details = " <b>" + kerbonaut.name + "</b> (Level " + kerbonaut.experienceLevel.ToString() + " " + kerbonaut.trait + ")";
                         if (missionProfile.oneWayMission || MissionController.GetKerbonautsMission(kerbonaut.name) != null || missionProfile.missionType != MissionProfileType.TRANSPORT) GUILayout.Label(" • " + details); // Do not transport kerbals, which are flagged for another mission or there isn't even a return-trip or transport happening
                         else
                         {
-                            bool selected = GUILayout.Toggle(crewToCollect.Contains(kerbonaut.name), details);
+                            var selected = GUILayout.Toggle(crewToCollect.Contains(kerbonaut.name), details);
                             if (selected && !crewToCollect.Contains(kerbonaut.name)) crewToCollect.Add(kerbonaut.name);
                             else if (!selected && crewToCollect.Contains(kerbonaut.name)) crewToCollect.Remove(kerbonaut.name);
                         }
@@ -91,24 +91,24 @@ namespace KSTS
                     // Display capacity:
                     if (crewToDeliver.Count > targetCrewCapacity) targetOverload = true;
                     headline = "<b>" + targetTemplate.template.shipName + ":</b> ";
-                    string seats = crewToDeliver.Count.ToString() + " / " + targetCrewCapacity.ToString() + " seat";
+                    var seats = crewToDeliver.Count.ToString() + " / " + targetCrewCapacity.ToString() + " seat";
                     if (targetCrewCapacity != 1) seats += "s";
                     if (targetOverload) seats = "<color=#FF0000>" + seats + "</color>";
                     GUILayout.Label(headline + seats);
                 }
 
                 // Display Transport-vessel summary, if this is a transport-mission:
-                bool transportOutboundOverload = false;
-                bool transportInboundOverload = false;
+                var transportOutboundOverload = false;
+                var transportInboundOverload = false;
                 if (missionProfile.missionType == MissionProfileType.TRANSPORT)
                 {
                     if (crewToDeliver.Count > missionProfile.crewCapacity) transportOutboundOverload = true;
                     if (crewToCollect.Count > missionProfile.crewCapacity) transportInboundOverload = true;
 
                     headline = "<b>" + missionProfile.vesselName + ":</b> ";
-                    string outbound = "outbound: " + crewToDeliver.Count.ToString() + "/" + missionProfile.crewCapacity.ToString();
+                    var outbound = "outbound: " + crewToDeliver.Count.ToString() + "/" + missionProfile.crewCapacity.ToString();
                     if (transportOutboundOverload) outbound = "<color=#FF0000>" + outbound + "</color>";
-                    string inbound = "";
+                    var inbound = "";
                     if (!missionProfile.oneWayMission)
                     {
                         inbound = ", inbound: " + crewToCollect.Count.ToString() + "/" + missionProfile.crewCapacity.ToString();
@@ -119,13 +119,13 @@ namespace KSTS
                 }
 
                 // Display crew-rowster:
-                foreach (ProtoCrewMember kerbonaut in GetCrewRoster())
+                foreach (var kerbonaut in GetCrewRoster())
                 {
-                    string details = " <b>" + kerbonaut.name + "</b> (Level " + kerbonaut.experienceLevel.ToString() + " " + kerbonaut.trait.ToString() + ")";
+                    var details = " <b>" + kerbonaut.name + "</b> (Level " + kerbonaut.experienceLevel.ToString() + " " + kerbonaut.trait.ToString() + ")";
                     if (MissionController.GetKerbonautsMission(kerbonaut.name) != null) GUILayout.Label(" • " + details); // Do not transport kerbals, which are flagged for another mission
                     else
                     {
-                        bool selected = GUILayout.Toggle(crewToDeliver.Contains(kerbonaut.name), details);
+                        var selected = GUILayout.Toggle(crewToDeliver.Contains(kerbonaut.name), details);
                         if (selected && !crewToDeliver.Contains(kerbonaut.name)) crewToDeliver.Add(kerbonaut.name);
                         else if (!selected && crewToDeliver.Contains(kerbonaut.name)) crewToDeliver.Remove(kerbonaut.name);
                     }
