@@ -8,4 +8,6 @@ For more information see the official [forum thread](http://forum.kerbalspacepro
 
 ![KSTS](http://i.imgur.com/fb57izT.png)
 
+Includes a small patch by base10 to allow launches from other bodies than Kerbin, generally facilitated by Kerbal Konstructs or similar.
+
 Licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0)

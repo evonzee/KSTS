@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\build\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,17 +24,25 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\build\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\KSP\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\ksp_binaries\1.4.3\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\build\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="KSPAssets">
-      <HintPath>..\..\KSP\KSP_Data\Managed\KSPAssets.dll</HintPath>
+      <HintPath>..\..\ksp_binaries\1.4.3\KSPAssets.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\build\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -43,13 +51,15 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\KSP\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\ksp_binaries\1.4.3\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\KSP\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\ksp_binaries\1.4.3\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CrewTransferBatch.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="GUICrewTransferSelector.cs" />
     <Compile Include="GUIFlagSelector.cs" />
     <Compile Include="GUIFlightsTab.cs" />
@@ -63,14 +73,22 @@
     <Compile Include="KSTS.cs" />
     <Compile Include="FlightRecorder.cs" />
     <Compile Include="GUI.cs" />
+    <Compile Include="LifeSupportWrapper.cs" />
     <Compile Include="MissionController.cs" />
+    <Compile Include="OrbitEditor.cs" />
     <Compile Include="StageRecoveryAPI.cs" />
     <Compile Include="TargetVessel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetPath)" "D:\KSP\KSTS\GameData\KSTS\$(TargetFileName)" &amp;&amp; copy /Y "$(TargetPath)" "D:\KSP\KSP\GameData\KSTS\$(TargetFileName)" &amp;&amp; copy /Y "D:\KSP\KSTS\GameData\KSTS\*" "D:\KSP\KSP\GameData\KSTS\"</PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == Debug (
+"C:\Games\Tools\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
+
+)</PostBuildEvent>
   </PropertyGroup>
+  <!--<PropertyGroup>
+    <PostBuildEvent>copy /Y "$(TargetPath)" "D:\KSP\KSTS\GameData\KSTS\$(TargetFileName)" &amp;&amp; copy /Y "$(TargetPath)" "D:\KSP\KSP\GameData\KSTS\$(TargetFileName)" &amp;&amp; copy /Y "D:\KSP\KSTS\GameData\KSTS\*" "D:\KSP\KSP\GameData\KSTS\"</PostBuildEvent>
+  </PropertyGroup>-->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

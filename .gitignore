@@ -7,6 +7,9 @@
 *.userosscache
 *.sln.docstates
 
+# VSCode config
+.vscode
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -229,3 +232,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+\.vs/
+
+\.idea/

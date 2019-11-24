@@ -120,7 +120,7 @@ namespace KSTS
         protected bool TryParseTextValue()
         {
             double parsedValue;
-            string text = this.textValue.Replace(",", "");
+            var text = this.textValue.Replace(",", "");
             text = Regex.Replace(text, this.unit + "$", "").Trim();
             if (!Double.TryParse(text, out parsedValue)) return false;
             if (parsedValue > this.maxValue) return false;
@@ -169,13 +169,13 @@ namespace KSTS
         // Returns a list of all the parts (as part-definitions) of the given template:
         public static List<AvailablePart> GetTemplateParts(ShipTemplate template)
         {
-            List<AvailablePart> parts = new List<AvailablePart>();
+            var parts = new List<AvailablePart>();
             if (template?.config == null) throw new Exception("invalid template");
-            foreach (ConfigNode node in template.config.GetNodes())
+            foreach (var node in template.config.GetNodes())
             {
                 if (node.name.ToLower() != "part") continue; // There are no other nodes-types in the vessel-config, but lets be safe.
                 if (!node.HasValue("part")) continue;
-                string partName = node.GetValue("part");
+                var partName = node.GetValue("part");
                 partName = Regex.Replace(partName, "_[0-9A-Fa-f]+$", ""); // The name of the part is appended by the UID (eg "Mark2Cockpit_4294755350"), which is numeric, but it won't hurt if we also remove hex-characters here.
                 if (!KSTS.partDictionary.ContainsKey(partName)) { Debug.LogError("[KSTS] part '" + partName + "' not found in global part-directory"); continue; }
                 parts.Add(KSTS.partDictionary[partName]);
@@ -186,7 +186,7 @@ namespace KSTS
         public int GetCrewCapacity()
         {
             if (cachedCrewCapacity != null) return (int)cachedCrewCapacity;
-            int crewCapacity = 0;
+            var crewCapacity = 0;
             if (HighLogic.LoadedScene == GameScenes.FLIGHT) throw new Exception("it is not safe to run this function while in flight"); // This applies to "ShipConstruction.LoadShip()", but I haven't tested "ShipConstruction.LoadSubassembly()" but lets be safe here.
             try
             {
@@ -198,11 +198,11 @@ namespace KSTS
                  * outside of our own code, which is why we use the following, cumbersome metod to try and parse the saved ship.
                  */
                 if (template == null) throw new Exception("missing template");
-                foreach(AvailablePart availablePart in GetTemplateParts(template))
+                foreach(var availablePart in GetTemplateParts(template))
                 {
                     if (availablePart.partConfig.HasValue("CrewCapacity"))
                     {
-                        int parsedCapacity = 0;
+                        var parsedCapacity = 0;
                         if (int.TryParse(availablePart.partConfig.GetValue("CrewCapacity"), out parsedCapacity)) crewCapacity += parsedCapacity;
                     }
                 }
@@ -223,7 +223,7 @@ namespace KSTS
             if (HighLogic.LoadedScene == GameScenes.FLIGHT) throw new Exception("ShipConstruction.LoadShip cannot be run while in flight"); // See "GetCrewCapacity".
             try
             {
-                foreach (AvailablePart availablePart in GetTemplateParts(template))
+                foreach (var availablePart in GetTemplateParts(template))
                 {
                     // Get the part's mass (should be the dry-mass, the resources are extra):
                     if (availablePart.partConfig.HasValue("mass"))
@@ -249,7 +249,7 @@ namespace KSTS
     public class GUI : UnityEngine.MonoBehaviour
     {
         public static Rect windowPosition = new Rect(300, 60, 450, 400);
-        public static GUIStyle windowStyle = new GUIStyle(HighLogic.Skin.window) { fixedWidth = 450f, fixedHeight = 500f };
+        public static GUIStyle windowStyle;
         public static bool showGui = false;
 
         // Styles (initialized in OnReady):
@@ -271,6 +271,10 @@ namespace KSTS
 
         void Awake()
         {
+            if (windowStyle == null)
+            {
+                windowStyle = new GUIStyle(HighLogic.Skin.window) { fixedWidth = 450f, fixedHeight = 500f };
+            }
             if (buttonIcon == null)
             {
                 buttonIcon = new Texture2D(36, 36, TextureFormat.RGBA32, false);
@@ -285,7 +289,7 @@ namespace KSTS
 
             if (helpText == "")
             {
-                string helpFilename = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/help.txt";
+                var helpFilename = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/help.txt";
                 if (File.Exists(helpFilename)) helpText = File.ReadAllText(helpFilename);
                 else helpText = "Help-file not found.";
             }
@@ -340,12 +344,12 @@ namespace KSTS
 
         public static string FormatDuration(double duration)
         {
-            int dayLength = 24;
+            var dayLength = 24;
             if (GameSettings.KERBIN_TIME) dayLength = 6;
-            double seconds = duration % 60;
-            int minutes = ((int)(duration / 60)) % 60;
-            int hours = ((int)(duration / 60 / 60)) % dayLength;
-            int days = ((int)(duration / 60 / 60 / dayLength));
+            var seconds = duration % 60;
+            var minutes = ((int)(duration / 60)) % 60;
+            var hours = ((int)(duration / 60 / 60)) % dayLength;
+            var days = ((int)(duration / 60 / 60 / dayLength));
             return String.Format("{0:0}/{1:00}:{2:00}:{3:00.00}", days, hours, minutes, seconds);
         }
 
@@ -358,7 +362,7 @@ namespace KSTS
         // Returns a thumbnail for a given vessel-name (used to find fitting images for vessels used in mission-profiles):
         public static Texture2D GetVesselThumbnail(string vesselName)
         {
-            foreach (CachedShipTemplate cachedTemplate in GUI.shipTemplates)
+            foreach (var cachedTemplate in GUI.shipTemplates)
             {
                 // This is strictly not correct, because the player could name VAB and SPH vessels the same, but this is easier
                 // than to also save the editor-type in the mission-profile:
@@ -370,15 +374,15 @@ namespace KSTS
         // For some reason Unity has no resize method, so we have to implement our own:
         public static Texture2D ResizeTexture(Texture2D input, int width, int height)
         {
-            Texture2D small = new Texture2D(width, height, TextureFormat.RGBA32, false);
-            float rx = (float)input.width / (float)small.width;
-            float ry = (float)input.height / (float)small.height;
-            for (int y = 0; y < small.height; y++)
+            var small = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            var rx = (float)input.width / (float)small.width;
+            var ry = (float)input.height / (float)small.height;
+            for (var y = 0; y < small.height; y++)
             {
-                int sy = (int)Math.Round(ry * y);
-                for (int x = 0; x < small.width; x++)
+                var sy = (int)Math.Round(ry * y);
+                for (var x = 0; x < small.width; x++)
                 {
-                    int sx = (int)Math.Round(rx * x);
+                    var sx = (int)Math.Round(rx * x);
                     small.SetPixel(x, y, input.GetPixel(sx, sy));
                 }
             }
@@ -393,25 +397,25 @@ namespace KSTS
             string[] editorFacilities = { "VAB", "SPH" }; // This is usually an enum, but we need the string later.
             GUI.shipTemplates.Clear();
 
-            foreach (string editorFacility in editorFacilities)
+            foreach (var editorFacility in editorFacilities)
             {
-                string shipDirectory = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/Ships/" + editorFacility; // Directory where the crafts are stored for the current game.
+                var shipDirectory = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/Ships/" + editorFacility; // Directory where the crafts are stored for the current game.
                 if (!Directory.Exists(shipDirectory)) continue;
 
                 // Get all crafts the player has designed in this savegame:
-                foreach (string craftFile in Directory.GetFiles(shipDirectory, "*.craft"))
+                foreach (var craftFile in Directory.GetFiles(shipDirectory, "*.craft"))
                 {
                     try
                     {
                         if (Path.GetFileNameWithoutExtension(craftFile) == "Auto-Saved Ship") continue; // Skip these, they would lead to duplicates, we only use finished crafts.
-                        CachedShipTemplate cachedTemplate = new CachedShipTemplate();
+                        var cachedTemplate = new CachedShipTemplate();
 
                         cachedTemplate.template = ShipConstruction.LoadTemplate(craftFile);
                         if (cachedTemplate.template == null) continue;
                         if (cachedTemplate.template.shipPartsExperimental || !cachedTemplate.template.shipPartsUnlocked) continue; // We won't bother with ships we can't use anyways.
 
                         // Try to load the thumbnail for this craft:
-                        string thumbFile = KSPUtil.ApplicationRootPath + "/thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName + ".png";
+                        var thumbFile = KSPUtil.ApplicationRootPath + "/thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName + ".png";
                         Texture2D thumbnail;
                         if (File.Exists(thumbFile))
                         {
@@ -458,7 +462,7 @@ namespace KSTS
                 GUILayout.EndArea();
 
                 // Tab-Switcher:
-                string[] toolbarStrings = new string[] {"Flights", "Deploy", "Transport", "Construct", "Record", "Help" };
+                var toolbarStrings = new string[] {"Flights", "Deploy", "Transport", "Construct", "Record", "Help" };
                 selectedMainTab = GUILayout.Toolbar(selectedMainTab, toolbarStrings);
 
                 switch (selectedMainTab)

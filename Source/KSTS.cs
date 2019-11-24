@@ -12,9 +12,9 @@ namespace KSTS
         // Returns a config-node which contains all public attributes of this object to be saved:
         public ConfigNode CreateConfigNode(string name)
         {
-            ConfigNode node = new ConfigNode(name);
-            FieldInfo[] fields = this.GetType().GetFields();
-            foreach (FieldInfo field in fields)
+            var node = new ConfigNode(name);
+            var fields = this.GetType().GetFields();
+            foreach (var field in fields)
             {
                 if (!field.IsPublic) continue; // Only public attributes should contain persistent values worth saving.
                 if (field.IsLiteral) continue; // Don't save constants.
@@ -23,8 +23,8 @@ namespace KSTS
                 // Save all elements of the list by creating multiple config-nodes with the same name:
                 if (field.FieldType == typeof(List<string>))
                 {
-                    List<string> list = (List<string>)field.GetValue(this);
-                    if (list != null) foreach (string element in list)
+                    var list = (List<string>)field.GetValue(this);
+                    if (list != null) foreach (var element in list)
                     {
                         node.AddValue(field.Name.ToString(), element);
                     }
@@ -32,8 +32,8 @@ namespace KSTS
                 // Save dictionary-values in a sub-node:
                 else if (field.FieldType == typeof(Dictionary<string, double>))
                 {
-                    ConfigNode dictNode = node.AddNode(field.Name.ToString());
-                    foreach (KeyValuePair<string, double> item in (Dictionary<string, double>)field.GetValue(this))
+                    var dictNode = node.AddNode(field.Name.ToString());
+                    foreach (var item in (Dictionary<string, double>)field.GetValue(this))
                     {
                         dictNode.AddValue(item.Key, item.Value.ToString());
                     }
@@ -52,8 +52,8 @@ namespace KSTS
         // Creates a new object from the given config-node to fill all of the objects public attributes:
         public static object CreateFromConfigNode(ConfigNode node, object obj)
         {
-            FieldInfo[] fields = obj.GetType().GetFields();
-            foreach (FieldInfo field in fields)
+            var fields = obj.GetType().GetFields();
+            foreach (var field in fields)
             {
                 if (!field.IsPublic) continue; // Only public attributes should contain persistent values worth saving.
                 if (field.IsLiteral) continue; // Don't load constants.
@@ -68,8 +68,8 @@ namespace KSTS
                 // Restore String-Lists by loading all nodes with the name of this field:
                 else if (field.FieldType == typeof(List<string>))
                 {
-                    List<string> list = new List<string>();
-                    foreach (string value in node.GetValues(field.Name.ToString()))
+                    var list = new List<string>();
+                    foreach (var value in node.GetValues(field.Name.ToString()))
                     {
                         list.Add(value);
                     }
@@ -78,8 +78,8 @@ namespace KSTS
                 // Restore the dictionary by loading all the values in the sub-node:
                 else if (field.FieldType == typeof(Dictionary<string, double>))
                 {
-                    Dictionary<string, double> dict = new Dictionary<string, double>();
-                    ConfigNode dictNode = node.GetNode(field.Name.ToString());
+                    var dict = new Dictionary<string, double>();
+                    var dictNode = node.GetNode(field.Name.ToString());
                     foreach (ConfigNode.Value item in dictNode.values)
                     {
                         dict.Add(item.name, double.Parse(item.value));
@@ -117,7 +117,7 @@ namespace KSTS
                 if (KSTS.partDictionary == null)
                 {
                     KSTS.partDictionary = new Dictionary<string, AvailablePart>();
-                    foreach (AvailablePart part in PartLoader.LoadedPartsList)
+                    foreach (var part in PartLoader.LoadedPartsList)
                     {
                         if (KSTS.partDictionary.ContainsKey(part.name.ToString()))
                         {
@@ -132,7 +132,7 @@ namespace KSTS
                 if (KSTS.resourceDictionary == null)
                 {
                     KSTS.resourceDictionary = new Dictionary<string, PartResourceDefinition>();
-                    foreach (PartResourceDefinition resourceDefinition in PartResourceLibrary.Instance.resourceDefinitions)
+                    foreach (var resourceDefinition in PartResourceLibrary.Instance.resourceDefinitions)
                     {
                         KSTS.resourceDictionary.Add(resourceDefinition.name.ToString(), resourceDefinition);
                     }
@@ -181,7 +181,7 @@ namespace KSTS
         // Fired for each stage on separation:
         private void onStageSeparation(EventReport data)
         {
-            string stageVesselId = data.origin.vessel.id.ToString();
+            var stageVesselId = data.origin.vessel.id.ToString();
             Debug.Log("[KSTS] detected stage separation (" + stageVesselId + " from " + lastActiveVesselId + ")");
             stageParentDictionary.Add(stageVesselId, lastActiveVesselId);
         }
@@ -257,19 +257,19 @@ namespace KSTS
                 if (HighLogic.CurrentGame.CrewRoster.Count > 0 && FlightGlobals.Vessels.Count > 0)
                 {
                     // Build a list of all Kerbals which are assigned to vessels:
-                    List<string> vesselCrewNames = new List<string>();
-                    foreach (Vessel vessel in FlightGlobals.Vessels)
+                    var vesselCrewNames = new List<string>();
+                    foreach (var vessel in FlightGlobals.Vessels)
                     {
-                        foreach (ProtoCrewMember crewMember in TargetVessel.GetCrew(vessel)) vesselCrewNames.Add(crewMember.name);
+                        foreach (var crewMember in TargetVessel.GetCrew(vessel)) vesselCrewNames.Add(crewMember.name);
                     }
 
                     // Build a list of all kerbals which we could have manipulated:
-                    List<ProtoCrewMember> kerbals = new List<ProtoCrewMember>();
-                    foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Crew)) kerbals.Add(kerbal);
-                    foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Tourist)) kerbals.Add(kerbal);
+                    var kerbals = new List<ProtoCrewMember>();
+                    foreach (var kerbal in HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Crew)) kerbals.Add(kerbal);
+                    foreach (var kerbal in HighLogic.CurrentGame.CrewRoster.Kerbals(ProtoCrewMember.KerbalType.Tourist)) kerbals.Add(kerbal);
 
                     // Check those kerbals against our vessel-list and maybe restore their correct status:
-                    foreach (ProtoCrewMember kerbal in kerbals)
+                    foreach (var kerbal in kerbals)
                     {
                         if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead) continue;
                         if (vesselCrewNames.Contains(kerbal.name) && kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Assigned)
