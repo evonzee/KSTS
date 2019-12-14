@@ -278,18 +278,18 @@ namespace KSTS
             if (buttonIcon == null)
             {
                 buttonIcon = new Texture2D(36, 36, TextureFormat.RGBA32, false);
-                buttonIcon.LoadImage(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "KSTS_icon.png")));
+                buttonIcon.LoadImage(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../PluginData/KSTS_icon.png")));
             }
             if (placeholderImage == null)
             {
                 placeholderImage = new Texture2D(275, 275, TextureFormat.RGBA32, false);
-                placeholderImage.LoadImage(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "placeholder.png")));
+                placeholderImage.LoadImage(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../PluginData/placeholder.png")));
                 placeholderImage = GUI.ResizeTexture(placeholderImage, 64, 64); // Default-size for our ship-icons
             }
 
             if (helpText == "")
             {
-                var helpFilename = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/help.txt";
+                var helpFilename = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "../PluginData/help.txt";
                 if (File.Exists(helpFilename)) helpText = File.ReadAllText(helpFilename);
                 else helpText = "Help-file not found.";
             }
