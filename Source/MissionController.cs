@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
 using KSP.UI.Screens.DebugToolbar.Screens.Cheats;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -296,7 +297,7 @@ namespace KSTS
             }
 
             vessel.id = Guid.NewGuid();
-            vessel.vesselName = ship.shipName;
+            vessel.vesselName = Localizer.Format(ship.shipName);
             vessel.persistentId = ship.persistentId;
             vessel.Initialize();
             if (orbit != null)
@@ -365,7 +366,7 @@ namespace KSTS
                 vessel.SetReferenceTransform(localRoot, true);
             }
 
-            Debug.Log("Vessel assembled for launch: " + vessel.vesselName);
+            Debug.Log("Vessel assembled for launch: " + Localizer.Format(vessel.vesselName));
             return vessel;
         }
 
@@ -446,7 +447,7 @@ namespace KSTS
             Vessel targetVessel = null;
             if (targetVesselId != null && (targetVessel = TargetVessel.GetVesselById((Guid)targetVesselId)) != null)
             {
-                description += "<b>Target:</b> " + targetVessel.vesselName + " @ " + GUI.FormatAltitude(targetVessel.altitude) + "\n";
+                description += "<b>Target:</b> " + Localizer.Format(targetVessel.vesselName) + " @ " + GUI.FormatAltitude(targetVessel.altitude) + "\n";
             }
 
             // Display the total weight of the payload we are hauling (transport-missions):
@@ -540,7 +541,7 @@ namespace KSTS
             var profile = new MissionProfile();
 
             profile.profileName = recording.profileName;
-            profile.vesselName = vessel.vesselName.ToString();
+            profile.vesselName = Localizer.Format(vessel.vesselName);
             profile.missionType = recording.missionType;
             profile.launchCost = recording.launchCost;
             profile.launchMass = recording.launchMass - recording.payloadMass;

@@ -5,6 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using KSP.UI.Screens; // For "ApplicationLauncherButton"
 using System.Text.RegularExpressions;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -291,7 +292,11 @@ namespace KSTS
             {
                 var helpFilename = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "../PluginData/help.txt";
                 if (File.Exists(helpFilename)) helpText = File.ReadAllText(helpFilename);
-                else helpText = "Help-file not found.";
+                else
+                {
+                    helpText = "Help-file not found.";
+                    Debug.Log("helpFilename: " + helpFilename);
+                }
             }
 
             // Add event-handlers to create and destroy our button:
@@ -366,7 +371,7 @@ namespace KSTS
             {
                 // This is strictly not correct, because the player could name VAB and SPH vessels the same, but this is easier
                 // than to also save the editor-type in the mission-profile:
-                if (cachedTemplate.template.shipName.ToString() == vesselName) return cachedTemplate.thumbnail;
+                if (Localizer.Format(cachedTemplate.template.shipName) == vesselName) return cachedTemplate.thumbnail;
             }
             return GUI.placeholderImage; // Fallback
         }

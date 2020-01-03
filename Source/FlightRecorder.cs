@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using StageRecovery;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -287,15 +288,15 @@ namespace KSTS
 
             status = FlightRecordingStatus.PRELAUNCH;
             startTime = Planetarium.GetUniversalTime();
-            profileName = vessel.vesselName.ToString();
+            profileName = Localizer.Format(vessel.vesselName);
 
             // Save the minimum altitude we need for a stable orbit as well as the launch-body's name:
             launchBodyName = vessel.mainBody.bodyName;
-            var pressureCurve = vessel.mainBody.atmospherePressureCurve;
+            FloatCurve pressureCurve = vessel.mainBody.atmospherePressureCurve;
             if(pressureCurve.Curve.length == 0) {
                 minAltitude = 1; // if there's no atmosphere, theoretically we could orbit at 1m
             }
-            for (var i = pressureCurve.Curve.length - 1; i >= 0; i--)
+            for (int i = pressureCurve.Curve.length - 1; i >= 0; i--)
             {
                 if (pressureCurve.Curve[i].value == 0)
                 {

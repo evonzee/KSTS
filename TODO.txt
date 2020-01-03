@@ -1,1 +1,33 @@
 Release Payload button can be replaced with monitoring selected decoupler
+Workflows need to be cleaned up
+
+As an example of the UI issues:
+
+
+2. This is the confusing part.  
+
+Click the toolbar button to show
+
+Click the Deploy button, it shows the different payloads
+
+Two different missions show, Deployment Mission and Probecore_To_Deploy.  The masses shown on this window appear to be launch weight of the vehicle
+
+Click either of them, and the two missions will be replaced by what appears to be the missions which can deploy the selected payload.  This window is actually showing all missions;  I ran a mission to put a 4520 kg payload in orbit, yet after selecting the payload, both missions (yours and mine) show up.  This may be a result of you're cheating the vessel to orbit.
+
+Then, I tried sending your payload up with my rocket, and then the ETA started counting down.  But there is no explanation of why the ETA was 4 hours.  It may be to launch at the same time of day, but I don't know why.  This mod has good promise, but these issues should be addressed
+
+Workflows
+
+Record a launch
+	Click Record in top row (maybe pause game while dialog gets filled out, FlightDriver.SetPause = true)
+	Select whether a Deploy or Transport
+	If Deploy
+		Select deploy decoupler
+	if Transport
+		Specify amount of resources which are designated as transport
+	Click Record (change to Start Recording)
+	Click Abort
+
+fairing with interstage are not shown as decouplers
+
+You can start recording before selecting a decoupler (for the deliver)

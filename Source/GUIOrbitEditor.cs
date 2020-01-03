@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -77,7 +78,7 @@ namespace KSTS
                         {
                             if (refVessel.situation != Vessel.Situations.ORBITING || refVessel.orbit.referenceBody != this.body) continue;
                             if (refVessel.orbit.ApA > Math.Floor(this.missionProfile.maxAltitude)) continue;
-                            refVessels.Add("<b>" + refVessel.vesselName + "</b> (" + refVessel.vesselType.ToString() + ")");
+                            refVessels.Add("<b>" + Localizer.Format(refVessel.vesselName) + "</b> (" + refVessel.vesselType.ToString() + ")");
                             refOrbits.Add(refVessel.orbit);
                         }
 
@@ -244,7 +245,7 @@ namespace KSTS
                         orbit = CreateOrbit(orbit.inclination, orbit.eccentricity, orbit.semiMajorAxis, orbit.LAN, orbit.argumentOfPeriapsis, orbit.meanAnomalyAtEpoch + adjustedAngle, orbit.epoch, orbit.referenceBody);
 
                         orbitAdjusted = true;
-                        Debug.Log("[KSTS] adjusting planned orbit by " + adjustedAngle + "° to avoid collision with '" + vessel.vesselName + "' (closest approach " + closestApproach.ToString() + "m @ " + UT.ToString() + " after " + iterationCount + " orbits)");
+                        Debug.Log("[KSTS] adjusting planned orbit by " + adjustedAngle + "° to avoid collision with '" + Localizer.Format(vessel.vesselName) + "' (closest approach " + closestApproach.ToString() + "m @ " + UT.ToString() + " after " + iterationCount + " orbits)");
                     }
                 }
                 adjustmentIterations++;

@@ -4,7 +4,18 @@ ChangeLog
 	Adoption by Linuxgurugamer
 	Moved button icon and placeholder icon into PluginData
 	Moved help.txt into PluginData
+	Merged in changes by Eric Vz
+		adjust build references to my locations
+		Add ability to launch / record from other bodies than Kerbin
+		Tweak for atmosphere-less bodies
+		update readme to mention my patches
+		Allow deployment from other planets than homeworld
+		Don't crash when opening transport tab. 
 
+		Note:  Based on comments on his repo:  Still need to fix transport to non-Kerbin bodies
+	Wrapped most vesselName entries with Localizer.Format()
+	Added an "Abort Recording & Revert to Launch" option
+	Disabled the "Start Recording" button if no decoupler is selected (for deploy), more than 1 decoupler selected or no payload mass selected (for Transport)
 
 1.11
 	KSP 1.4.2 update
