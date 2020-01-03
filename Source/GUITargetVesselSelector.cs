@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -21,7 +22,7 @@ namespace KSTS
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label("<size=14><b>Target:</b></size>", new GUIStyle(GUI.labelStyle) { stretchWidth = true });
-            if (GUILayout.Button("<size=14><color=#F9FA86><b>" + targetVessel.vesselName.ToString() + "</b></color> (Apoapsis: " + GUI.FormatAltitude(targetVessel.orbit.ApA) + ")</size>", new GUIStyle(GUI.buttonStyle) { alignment = TextAnchor.MiddleRight, stretchWidth = false, fixedWidth = 320 }))
+            if (GUILayout.Button("<size=14><color=#F9FA86><b>" + Localizer.Format(targetVessel.vesselName) + "</b></color> (Apoapsis: " + GUI.FormatAltitude(targetVessel.orbit.ApA) + ")</size>", new GUIStyle(GUI.buttonStyle) { alignment = TextAnchor.MiddleRight, stretchWidth = false, fixedWidth = 320 }))
             {
                 selectedIndex = -1;
                 targetVessel = null;
@@ -67,7 +68,7 @@ namespace KSTS
                     var filterThisTarget = false;
                     if (!TargetVessel.IsValidTarget(vessel)) continue;
                     var descriptions = new List<string>();
-                    descriptions.Add("<color=#F9FA86><b>" + vessel.vesselName + "</b></color><color=#FFFFFF>");
+                    descriptions.Add("<color=#F9FA86><b>" + Localizer.Format(vessel.vesselName) + "</b></color><color=#FFFFFF>");
 
                     // Orbital-Parameters:
                     descriptions.Add("<b>Apoapsis:</b> " + GUI.FormatAltitude(vessel.orbit.ApA) + ", <b>Periapsis:</b> " + GUI.FormatAltitude(vessel.orbit.PeA) + ", <b>MET:</b> " + GUI.FormatDuration(vessel.missionTime));

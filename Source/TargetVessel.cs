@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -73,7 +74,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] GetVesselDockingPortTypes(" + vessel.vesselName.ToString() + "): " + e.ToString());
+                Debug.LogError("[KSTS] GetVesselDockingPortTypes(" + Localizer.Format(vessel.vesselName)+ "): " + e.ToString());
             }
             return dockingPortTypes;
         }
@@ -114,7 +115,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] GetFreeResourcesCapacities(" + vessel.vesselName.ToString() + "): " + e.ToString());
+                Debug.LogError("[KSTS] GetFreeResourcesCapacities(" + Localizer.Format(vessel.vesselName) + "): " + e.ToString());
             }
             return availableResources;
         }
@@ -189,7 +190,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] TargetVessel.GetVesselSize(" + vessel.vesselName + "): " + e.ToString());
+                Debug.LogError("[KSTS] TargetVessel.GetVesselSize(" + Localizer.Format(vessel.vesselName) + "): " + e.ToString());
                 return 1000; // If we can't tell, lets make it 1km to be safe
             }
         }
@@ -231,12 +232,12 @@ namespace KSTS
                 GameEvents.onVesselWasModified.Fire(vessel);
 
                 // Log Message about the transfer:
-                Debug.Log("[KSTS] added " + (amount - amountToAdd).ToString() + " / " + amount.ToString() + " of " + resourceName + " to " + vessel.vesselName);
-                ScreenMessages.PostScreenMessage(vessel.vesselName + " received " + Math.Round(amount + amountToAdd).ToString() + " of " + resourceName);
+                Debug.Log("[KSTS] added " + (amount - amountToAdd).ToString() + " / " + amount.ToString() + " of " + resourceName + " to " + Localizer.Format(vessel.vesselName));
+                ScreenMessages.PostScreenMessage(Localizer.Format(vessel.vesselName) + " received " + Math.Round(amount + amountToAdd).ToString() + " of " + resourceName);
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] TargetVessel.AddResources("+vessel.vesselName+","+resourceName+","+amount.ToString()+"): " + e.ToString());
+                Debug.LogError("[KSTS] TargetVessel.AddResources("+ Localizer.Format(vessel.vesselName) + ","+resourceName+","+amount.ToString()+"): " + e.ToString());
             }
         }
 
@@ -260,8 +261,8 @@ namespace KSTS
                 if (kerbonaut == null)
                 {
                     // The player must have removed the kerbal from the pool of available kerbonauts:
-                    Debug.Log("[KSTS] unable to complete crew-transfer to " + vessel.vesselName + ", kerbonaut " + kerbonautName + " unavailable or missiong");
-                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Kerbonaut " + kerbonautName + " unavailable for transfer to " + vessel.vesselName);
+                    Debug.Log("[KSTS] unable to complete crew-transfer to " + Localizer.Format(vessel.vesselName) + ", kerbonaut " + kerbonautName + " unavailable or missiong");
+                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Kerbonaut " + kerbonautName + " unavailable for transfer to " + Localizer.Format(vessel.vesselName));
                     return;
                 }
 
@@ -279,8 +280,8 @@ namespace KSTS
                 if (targetPart == null)
                 {
                     // Maybe there was a different transport-mission to the same target-vessel:
-                    Debug.Log("[KSTS] unable to complete crew-transfer to " + vessel.vesselName + ", no free seats");
-                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Vessel " + vessel.vesselName + " had no free seat for Kerbonaut " + kerbonautName);
+                    Debug.Log("[KSTS] unable to complete crew-transfer to " + Localizer.Format(vessel.vesselName) + ", no free seats");
+                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Vessel " + Localizer.Format(vessel.vesselName) + " had no free seat for Kerbonaut " + kerbonautName);
                     return;
                 }
 
@@ -312,12 +313,12 @@ namespace KSTS
                 // Notyfy other mods about the modification of the vessel's crew:
                 GameEvents.onVesselCrewWasModified.Fire(vessel);
 
-                Debug.Log("[KSTS] added kerbonaut " + kerbonautName + " to vessel " + vessel.vesselName);
-                ScreenMessages.PostScreenMessage("Kerbonaut " + kerbonautName + " transfered to " + vessel.vesselName);
+                Debug.Log("[KSTS] added kerbonaut " + kerbonautName + " to vessel " + Localizer.Format(vessel.vesselName));
+                ScreenMessages.PostScreenMessage("Kerbonaut " + kerbonautName + " transfered to " + Localizer.Format(vessel.vesselName));
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] TargetVessel.AddCrewMember(" + vessel.vesselName + "," + kerbonautName + "): " + e.ToString());
+                Debug.LogError("[KSTS] TargetVessel.AddCrewMember(" + Localizer.Format(vessel.vesselName) + "," + kerbonautName + "): " + e.ToString());
             }
         }
 
@@ -343,8 +344,8 @@ namespace KSTS
                 if (sourcePart == null || kerbonaut == null)
                 {
                     // Maybe the plaayer has removed the kerbal from the vessel (eg EVA, docking, etc):
-                    Debug.Log("[KSTS] unable to recover kerbonaut "+kerbonautName+" from vessel "+vessel.vesselName+", kerbal not found on board");
-                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Kerbonaut " + kerbonautName + " not present on " + vessel.vesselName);
+                    Debug.Log("[KSTS] unable to recover kerbonaut "+kerbonautName+" from vessel "+ Localizer.Format(vessel.vesselName) + ", kerbal not found on board");
+                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Kerbonaut " + kerbonautName + " not present on " + Localizer.Format(vessel.vesselName));
                     return;
                 }
 
@@ -363,12 +364,12 @@ namespace KSTS
                 // Notyfy other mods about the modification of the vessel's crew:
                 GameEvents.onVesselCrewWasModified.Fire(vessel);
 
-                Debug.Log("[KSTS] recovered kerbonaut " + kerbonautName + " from vessel " + vessel.vesselName);
-                ScreenMessages.PostScreenMessage("Kerbonaut " + kerbonautName + " recovered from " + vessel.vesselName);
+                Debug.Log("[KSTS] recovered kerbonaut " + kerbonautName + " from vessel " + Localizer.Format(vessel.vesselName));
+                ScreenMessages.PostScreenMessage("Kerbonaut " + kerbonautName + " recovered from " + Localizer.Format(vessel.vesselName));
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] TargetVessel.RecoverCrewMember(" + vessel.vesselName + "," + kerbonautName + "): " + e.ToString());
+                Debug.LogError("[KSTS] TargetVessel.RecoverCrewMember(" + Localizer.Format(vessel.vesselName) + "," + kerbonautName + "): " + e.ToString());
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -67,7 +68,7 @@ namespace KSTS
                     // Display capacity and transfer deltas:
                     var targetVesselCrew = TargetVessel.GetCrew(targetVessel);
                     if (targetVesselCrew.Count + crewToDeliver.Count - crewToCollect.Count > targetCrewCapacity) targetOverload = true;
-                    headline = "<b>" + targetVessel.vesselName + ":</b> " + targetVesselCrew.Count.ToString() + "/" + targetCrewCapacity.ToString();
+                    headline = "<b>" + Localizer.Format(targetVessel.vesselName) + ":</b> " + targetVesselCrew.Count.ToString() + "/" + targetCrewCapacity.ToString();
                     var transfers = " inbound: " + crewToDeliver.Count.ToString("+#;-#;0") + ", outbound: " + (-crewToCollect.Count).ToString("+#;-#;0");
                     if (targetOverload) transfers = "<color=#FF0000>" + transfers + "</color>";
                     GUILayout.Label(headline + transfers);
@@ -105,7 +106,7 @@ namespace KSTS
                     if (crewToDeliver.Count > missionProfile.crewCapacity) transportOutboundOverload = true;
                     if (crewToCollect.Count > missionProfile.crewCapacity) transportInboundOverload = true;
 
-                    headline = "<b>" + missionProfile.vesselName + ":</b> ";
+                    headline = "<b>" + Localizer.Format(missionProfile.vesselName) + ":</b> ";
                     var outbound = "outbound: " + crewToDeliver.Count.ToString() + "/" + missionProfile.crewCapacity.ToString();
                     if (transportOutboundOverload) outbound = "<color=#FF0000>" + outbound + "</color>";
                     var inbound = "";

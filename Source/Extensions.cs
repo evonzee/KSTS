@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -86,7 +87,7 @@ namespace KSTS
                 }
                 if (killcount != 0)
                 {
-                    Log($"Removed {killcount} launch clamps from {vessel.vesselName}");
+                    Log($"Removed {killcount} launch clamps from {Localizer.Format( vessel.vesselName)}");
                 }
             }
         }
@@ -122,7 +123,7 @@ namespace KSTS
             {
                 return "Active vessel";
             }
-            return vessel.vesselName;
+            return Localizer.Format(vessel.vesselName);
         }
 
         public static string OrbitDriverToString(this OrbitDriver driver)

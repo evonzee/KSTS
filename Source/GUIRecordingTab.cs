@@ -33,6 +33,7 @@ namespace KSTS
         public static void Display()
         {
             if (!initialized) Initialize();
+
             var vessel = FlightGlobals.ActiveVessel;
             FlightRecording recording = null;
             if (vessel) recording = FlightRecorder.GetFlightRecording(vessel);
@@ -96,7 +97,7 @@ namespace KSTS
                     GUILayout.EndHorizontal();
                 }
                 GUILayout.EndScrollView();
-
+                int selected = 0;
                 // Display payload selector:
                 if (recording.status == FlightRecordingStatus.ASCENDING || recording.status == FlightRecordingStatus.PRELAUNCH)
                 {
@@ -105,7 +106,7 @@ namespace KSTS
                     var missionTypeStrings = new string[] { "Deploy", "Transport" };
                     selectedMissionTypeTab = GUILayout.Toolbar(selectedMissionTypeTab, missionTypeStrings);
                     GUILayout.EndHorizontal();
-
+               
                     scrollPos = GUILayout.BeginScrollView(scrollPos, GUI.scrollStyle, GUILayout.Height(210), GUILayout.MaxHeight(210));
                     if (selectedMissionTypeTab == 0)
                     {
@@ -123,6 +124,7 @@ namespace KSTS
                                 GUILayout.BeginHorizontal();
                                 if (GUILayout.Toggle(selectedPayloadAssemblyIds.Contains(payloadAssembly.id), "<b>" + payloadAssembly.name + "</b>"))
                                 {
+                                    selected++;
                                     if (!selectedPayloadAssemblyIds.Contains(payloadAssembly.id))
                                     {
                                         selectedPayloadAssemblyIds.Add(payloadAssembly.id);
@@ -178,7 +180,7 @@ namespace KSTS
                                 if (selectedPayloadDeploymentResources.ContainsKey(payloadResource.name)) selectedPayloadDeploymentResources[payloadResource.name] = selectedAmount;
                                 else selectedPayloadDeploymentResources.Add(payloadResource.name, selectedAmount);
                             }
-
+                            selected = (totalPayloadMass > 0)?1:0;
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("<b>Total Payload</b>");
                             GUILayout.Label(totalPayloadMass.ToString("#,##0.00 t  "), new GUIStyle(GUI.labelStyle) { alignment = TextAnchor.MiddleRight });
@@ -190,12 +192,14 @@ namespace KSTS
 
                 // Bottom pane with action-buttons:
                 GUILayout.BeginHorizontal();
-                if (recording.status == FlightRecordingStatus.PRELAUNCH && GUILayout.Button("Record", GUI.buttonStyle))
+                if (selected != 1)
+                    UnityEngine.GUI.enabled = false;
+                if (recording.status == FlightRecordingStatus.PRELAUNCH && GUILayout.Button("Start Recording", GUI.buttonStyle))
                 {
                     // Start Recording:
                     FlightRecorder.StartRecording(vessel);
                 }
-
+                UnityEngine.GUI.enabled = true;
                 if (recording.CanDeploy() && GUILayout.Button("Release Payload", GUI.buttonStyle))
                 {
                     if (selectedMissionTypeTab == 0)
@@ -220,10 +224,18 @@ namespace KSTS
                     FlightRecorder.SaveRecording(vessel);
                 }
 
-                if (recording.status != FlightRecordingStatus.PRELAUNCH && GUILayout.Button("Abort", GUI.buttonStyle))
+                if (recording.status != FlightRecordingStatus.PRELAUNCH)
                 {
-                    // Cancel runnig recording:
-                    FlightRecorder.CancelRecording(vessel);
+                    if (GUILayout.Button("Abort Recording", GUI.buttonStyle))
+                    {
+                        // Cancel runnig recording:
+                        FlightRecorder.CancelRecording(vessel);
+                    }
+                    if (GUILayout.Button("Abort Recording and Revert to Launch"))
+                    {
+                        FlightRecorder.CancelRecording(vessel);
+                        FlightDriver.RevertToLaunch();
+                    }
                 }
                 GUILayout.EndHorizontal();
             }

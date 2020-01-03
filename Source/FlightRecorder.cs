@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using StageRecovery;
+using KSP.Localization;
 
 namespace KSTS
 {
@@ -287,7 +288,7 @@ namespace KSTS
 
             status = FlightRecordingStatus.PRELAUNCH;
             startTime = Planetarium.GetUniversalTime();
-            profileName = vessel.vesselName.ToString();
+            profileName = Localizer.Format(vessel.vesselName);
 
             // Save the minimum altitude we need for a stable orbit as well as the launch-body's name:
             launchBodyName = vessel.mainBody.bodyName;
