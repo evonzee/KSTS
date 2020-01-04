@@ -40,7 +40,7 @@ internal class Startup : MonoBehaviour
 [KSPAddon(KSPAddon.Startup.MainMenu, true)]
 internal class InstallChecker : MonoBehaviour
 {
-    private const string MODNAME = "KSTS";
+    private const string MODNAME = "Kerbal Space Transport System";
     private const string FOLDERNAME = "KSTS";
     private const string EXPECTEDPATH = FOLDERNAME + "/Plugins";
 

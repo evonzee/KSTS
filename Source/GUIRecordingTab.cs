@@ -193,13 +193,25 @@ namespace KSTS
                 // Bottom pane with action-buttons:
                 GUILayout.BeginHorizontal();
                 if (selected != 1)
+                {
                     UnityEngine.GUI.enabled = false;
+                    UnityEngine.GUI.backgroundColor = Color.red;
+                }
+                else
+                {
+                    Color c = Color.green;
+                    c.a = 1;
+                    UnityEngine.GUI.backgroundColor = c;
+                }
+  
                 if (recording.status == FlightRecordingStatus.PRELAUNCH && GUILayout.Button("Start Recording", GUI.buttonStyle))
                 {
                     // Start Recording:
                     FlightRecorder.StartRecording(vessel);
                 }
                 UnityEngine.GUI.enabled = true;
+                UnityEngine.GUI.backgroundColor = GUI.normalGUIbackground;
+                
                 if (recording.CanDeploy() && GUILayout.Button("Release Payload", GUI.buttonStyle))
                 {
                     if (selectedMissionTypeTab == 0)

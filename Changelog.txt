@@ -16,6 +16,12 @@ ChangeLog
 	Wrapped most vesselName entries with Localizer.Format()
 	Added an "Abort Recording & Revert to Launch" option
 	Disabled the "Start Recording" button if no decoupler is selected (for deploy), more than 1 decoupler selected or no payload mass selected (for Transport)
+	Added red/green color to the StartRecording button as additional indication 
+	Disabled the top buttons if no missions are available
+	Minor editing of the help file
+	Replaced button code with ToolbarControl
+	Added support of ClickThroughBlocker
+	Moved all classes originally in GUI.cs into individual files
 
 1.11
 	KSP 1.4.2 update
