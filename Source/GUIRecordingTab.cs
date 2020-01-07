@@ -5,8 +5,10 @@ namespace KSTS
 {
     class GUIRecordingTab
     {
+        enum MissionTypes { Deploy = 0, Transport = 1 };
+
         private static bool initialized = false;
-        private static int selectedMissionTypeTab = 0;
+        private static int selectedMissionTypeTab = (int)MissionTypes.Deploy;
         private static Vector2 scrollPos = Vector2.zero;
         private static Dictionary<string, double> selectedPayloadDeploymentResources = null;
         private static List<string> selectedPayloadAssemblyIds = null;
@@ -30,6 +32,8 @@ namespace KSTS
             if (selectedPayloadAssemblyIds != null) selectedPayloadAssemblyIds.Clear();
         }
 
+        
+        static string[] missionTypeStrings = new string[] { "Deploy", "Transport" };
         public static void Display()
         {
             if (!initialized) Initialize();
@@ -103,12 +107,12 @@ namespace KSTS
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("<size=14><b>Mission Type:</b></size>");
-                    var missionTypeStrings = new string[] { "Deploy", "Transport" };
+               
                     selectedMissionTypeTab = GUILayout.Toolbar(selectedMissionTypeTab, missionTypeStrings);
                     GUILayout.EndHorizontal();
                
                     scrollPos = GUILayout.BeginScrollView(scrollPos, GUI.scrollStyle, GUILayout.Height(210), GUILayout.MaxHeight(210));
-                    if (selectedMissionTypeTab == 0)
+                    if (selectedMissionTypeTab == (int)MissionTypes.Deploy)
                     {
                         // Show all deployable payloads:
                         if (!recording.CanPerformMission(MissionProfileType.DEPLOY))
@@ -214,7 +218,7 @@ namespace KSTS
                 
                 if (recording.CanDeploy() && GUILayout.Button("Release Payload", GUI.buttonStyle))
                 {
-                    if (selectedMissionTypeTab == 0)
+                    if (selectedMissionTypeTab == (int)MissionTypes.Deploy)
                     {
                         var payloadAssemblies = recording.GetPayloadAssemblies();
                         var selectedPayloadAssemblies = new List<PayloadAssembly>();

@@ -63,7 +63,7 @@ namespace KSTS
             var red = "#FF0000";
 
             // Show a list with all possible mission-profiles:
-            if (MissionController.missionProfiles.Values.Count == 0)
+            if (MissionController.missionProfiles.Count == 0)
             {
                 GUILayout.Label("No recordings found, switch to a new vessel to start recording a mission.");
             }

@@ -227,11 +227,11 @@ namespace KSTS
             return small;
         }
 
+        static string[] editorFacilities = { "VAB", "SPH" }; // This is usually an enum, but we need the string later.
         // Updates the cache we use to store the meta-data of the various ships the player has designed:
         public static void UpdateShipTemplateCache()
         {
             if (GUI.shipTemplates == null) GUI.shipTemplates = new List<CachedShipTemplate>();
-            string[] editorFacilities = { "VAB", "SPH" }; // This is usually an enum, but we need the string later.
             GUI.shipTemplates.Clear();
 
             foreach (var editorFacility in editorFacilities)
@@ -302,7 +302,7 @@ namespace KSTS
                 GUILayout.EndArea();
 
                 // Tab-Switcher:
-                if (MissionController.missions.Count == 0)
+                if (MissionController.missionProfiles.Count == 0)
                 {
                     int x = WIDTH / 6 - 6;
                     GUILayout.BeginHorizontal();

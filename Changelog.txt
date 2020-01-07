@@ -1,5 +1,9 @@
 ChangeLog
 
+2.0.0.1
+	Some memory optimizations by moving string arrays which have fixed data out of methods and made static
+	Fixed mission buttons being greyed out even though missions were recorded
+
 2.0.0
 	Adoption by Linuxgurugamer
 	Moved button icon and placeholder icon into PluginData

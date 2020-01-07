@@ -40,17 +40,19 @@ namespace KSTS
             crewTransferSelector = new GUICrewTransferSelector(targetVessel, missionProfile);
         }
 
+        enum TransportTypes { Resources = 0, Crew = 1 };
+        static string[] transportTypeStrings = new string[] { "Resources", "Crew" };
         // Shows a list of all available payload-resources the player can choose from:
         public bool DisplayList()
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label("<size=14><b>Cargo:</b></size>");
-            var transportTypeStrings = new string[] { "Resources", "Crew" };
+           
             selectedTransportType = GUILayout.Toolbar(selectedTransportType, transportTypeStrings);
             GUILayout.EndHorizontal();
 
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUI.scrollStyle);
-            if (selectedTransportType == 0)
+            if (selectedTransportType == (int)TransportTypes.Resources)
             {
                 // Transport Resources:
                 selectedCrewTransfers = null;

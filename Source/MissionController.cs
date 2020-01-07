@@ -580,6 +580,7 @@ namespace KSTS
         {
             if (MissionController.missionProfiles == null)
             {
+                Debug.Log("[KSTS] MissionController.Initialize");
                 MissionController.missionProfiles = new Dictionary<string, MissionProfile>();
             }
 
@@ -589,6 +590,8 @@ namespace KSTS
             }
         }
 
+        static string[] postfixes = { "Alpha", "Beta", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Omega" };
+
         private static string GetUniqueProfileName(string name)
         {
             name = name.Trim();
@@ -597,8 +600,7 @@ namespace KSTS
                 name = "KSTS";
             }
 
-            string[] postfixes = { "Alpha", "Beta", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Omega" };
-            var postfixNumber = 0;
+             var postfixNumber = 0;
             var uniqueName = name;
             var lowercase = name.ToLower() == name; // If the name is in all lowercase, we don't want to break it by adding uppercase letters
             while (MissionController.missionProfiles.ContainsKey(uniqueName))
@@ -631,7 +633,7 @@ namespace KSTS
             profile.profileName = MissionController.GetUniqueProfileName(profile.profileName);
 
             MissionController.missionProfiles.Add(profile.profileName, profile);
-            Debug.Log("[KSTS] saved new mission profile '" + profile.profileName + "'");
+            Debug.Log("[KSTS] saved new mission profile '" + profile.profileName + "'"+ "   Total of " + MissionController.missionProfiles.Count + " missions saved");
         }
 
         public static void DeleteMissionProfile(string name)
@@ -647,6 +649,7 @@ namespace KSTS
             // Remove the profile:
             if (MissionController.missionProfiles.ContainsKey(name))
             {
+                Debug.Log("[KSTS] MissionController.DeleteMissionProfile");
                 MissionController.missionProfiles.Remove(name);
             }
         }
@@ -659,9 +662,11 @@ namespace KSTS
                 return;
             }
 
+            Debug.Log("[KSTS] MissionController.ChangeMissionProfileName");
             MissionController.missionProfiles.Remove(name);
             profile.profileName = MissionController.GetUniqueProfileName(newName);
             MissionController.missionProfiles.Add(profile.profileName, profile);
+            Debug.Log("[KSTS] MissionController.ChangeMissionProfileName");
         }
 
         public static void LoadMissions(ConfigNode node)
@@ -674,6 +679,7 @@ namespace KSTS
                 {
                     var missionProfile = MissionProfile.CreateFromConfigNode(missionProfileNode);
                     MissionController.missionProfiles.Add(missionProfile.profileName, missionProfile);
+                    Debug.Log("[KSTS] MissionController.LoadMissions");
                 }
             }
 

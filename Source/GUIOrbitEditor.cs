@@ -46,9 +46,9 @@ namespace KSTS
             referenceVesselEpoch = 0;
         }
 
+        static string[] options = { "Simple Orbit", "Complex Orbit" };
         public void DisplayEditor()
         {
-            string[] options = { "Simple Orbit", "Complex Orbit" };
             var newSelection = GUILayout.Toolbar(selectedEditorTab, options);
             if (newSelection != selectedEditorTab)
             {
