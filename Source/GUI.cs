@@ -78,7 +78,7 @@ namespace KSTS
                     helpText = "Help-file not found.";
                     Debug.Log("helpFilename: " + helpFilename);
                 }
-               
+
             }
 
 
@@ -111,7 +111,7 @@ namespace KSTS
         {
             if (toolbarControl != null)
                 return;
-            
+
             toolbarControl = gameObject.AddComponent<ToolbarControl>();
             toolbarControl.AddToAllToolbars(GuiOn, GuiOff,
                 ApplicationLauncher.AppScenes.SPACECENTER |
@@ -159,7 +159,7 @@ namespace KSTS
             showGui = false;
         }
 #endif
-        
+
         void NoOnDestroy()
         {
             toolbarControl.OnDestroy();
@@ -240,40 +240,66 @@ namespace KSTS
                 if (!Directory.Exists(shipDirectory)) continue;
 
                 // Get all crafts the player has designed in this savegame:
-                foreach (var craftFile in Directory.GetFiles(shipDirectory, "*.craft"))
-                {
-                    try
-                    {
-                        if (Path.GetFileNameWithoutExtension(craftFile) == "Auto-Saved Ship") continue; // Skip these, they would lead to duplicates, we only use finished crafts.
-                        var cachedTemplate = new CachedShipTemplate();
+                ReadAllCraftFiles(editorFacility, shipDirectory);
 
-                        cachedTemplate.template = ShipConstruction.LoadTemplate(craftFile);
-                        if (cachedTemplate.template == null) continue;
-                        if (cachedTemplate.template.shipPartsExperimental || !cachedTemplate.template.shipPartsUnlocked) continue; // We won't bother with ships we can't use anyways.
-
-                        // Try to load the thumbnail for this craft:
-                        var thumbFile = KSPUtil.ApplicationRootPath + "/thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName + ".png";
-                        Texture2D thumbnail;
-                        if (File.Exists(thumbFile))
-                        {
-                            thumbnail = new Texture2D(256, 256, TextureFormat.RGBA32, false);
-                            thumbnail.LoadImage(File.ReadAllBytes(thumbFile));
-                        }
-                        else thumbnail = placeholderImage;
-
-                        // The thumbnails are rather large, so we have to resize them first:
-                        cachedTemplate.thumbnail = GUI.ResizeTexture(thumbnail, 64, 64);
-
-                        GUI.shipTemplates.Add(cachedTemplate);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("[KSTS] UpdateShipTemplateCache() processing '" + craftFile + "': " + e.ToString());
-                    }
-                }
             }
+            // now read the subassemblies available
+            var shipDirectory2 = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/Subassemblies"; // Directory where the crafts are stored for the current game.             
+            ReadAllCraftFiles("Subassemblies", shipDirectory2);
 
             GUI.shipTemplates.Sort((x, y) => x.template.shipName.CompareTo(y.template.shipName));
+        }
+
+
+        static void ReadAllCraftFiles(string editorFacility, string shipDirectory)
+        {
+            foreach (var craftFile in Directory.GetFiles(shipDirectory, "*.craft"))
+            {
+                try
+                {
+                    if (Path.GetFileNameWithoutExtension(craftFile) == "Auto-Saved Ship") continue; // Skip these, they would lead to duplicates, we only use finished crafts.
+                    var cachedTemplate = new CachedShipTemplate();
+                    switch (editorFacility)
+                    {
+                        case "VAB": cachedTemplate.templateOrigin = TemplateOrigin.VAB; break;
+                        case "SPH": cachedTemplate.templateOrigin = TemplateOrigin.SPH; break;
+                        case "Subassemblies": cachedTemplate.templateOrigin = TemplateOrigin.SubAssembly; break;
+                    }
+                    cachedTemplate.template = ShipConstruction.LoadTemplate(craftFile);
+                    if (cachedTemplate.template == null) continue;
+                    if (cachedTemplate.template.shipPartsExperimental || !cachedTemplate.template.shipPartsUnlocked) continue; // We won't bother with ships we can't use anyways.
+
+                    // Try to load the thumbnail for this craft:
+                    var thumbFile = KSPUtil.ApplicationRootPath + "/thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName + ".png";
+                    Texture2D thumbnail;
+
+                    //
+                    // Make the thumbnail file if it doesn't exist.
+                    // Needed for the subassemblies, but will also be used if a craft thumbnail is missing
+                    //
+                    if (!File.Exists(thumbFile))
+                    {
+                        ShipConstruct ship = ShipConstruction.LoadShip(craftFile);
+                        ThumbnailHelper.CaptureThumbnail(ship, 256, "thumbs/", HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName);
+                    }
+
+                    if (File.Exists(thumbFile))
+                    {
+                        thumbnail = new Texture2D(256, 256, TextureFormat.RGBA32, false);
+                        thumbnail.LoadImage(File.ReadAllBytes(thumbFile));
+                    }
+                    else thumbnail = placeholderImage;
+
+                    // The thumbnails are rather large, so we have to resize them first:
+                    cachedTemplate.thumbnail = GUI.ResizeTexture(thumbnail, 64, 64);
+
+                    GUI.shipTemplates.Add(cachedTemplate);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("[KSTS] UpdateShipTemplateCache() processing '" + craftFile + "': " + e.ToString());
+                }
+            }
         }
 
         // Resets all internally used objects and caches, can be used for example when a savegame is loaded:

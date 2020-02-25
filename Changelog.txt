@@ -1,5 +1,12 @@
 ChangeLog
 
+2.0.1
+	Updated help text
+	Added filter to payload selection
+	Added subassemblies as available payloads
+	Added toggles to select from VAB, SPH & Subassemblies
+	Added code to create thumbnails for subassemblies and any missing ship thumbnails
+
 2.0.0.1
 	Some memory optimizations by moving string arrays which have fixed data out of methods and made static
 	Fixed mission buttons being greyed out even though missions were recorded

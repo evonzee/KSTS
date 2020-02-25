@@ -14,12 +14,14 @@ using ClickThroughFix;
 namespace KSTS
 {
 
+    public enum TemplateOrigin { VAB, SPH, SubAssembly};
 
     // Helper class to store a ships template (from the craft's save-file) together with its generated thumbnail:
     public class CachedShipTemplate
     {
         public ShipTemplate template = null;
         public Texture2D thumbnail = null;
+        public TemplateOrigin templateOrigin;
 
         private int? cachedCrewCapacity = null;
         private double? cachedDryMass = null;
