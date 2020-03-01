@@ -270,30 +270,27 @@ namespace KSTS
                     }
 
                     cachedTemplate.template = ShipConstruction.LoadTemplate(craftFile);
-                    
+
                     if (cachedTemplate.template == null) continue;
                     if (cachedTemplate.template.shipPartsExperimental || !cachedTemplate.template.shipPartsUnlocked) continue; // We won't bother with ships we can't use anyways.
 
                     // Try to load the thumbnail for this craft:
-                    var thumbFile = KSPUtil.ApplicationRootPath + "thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName + ".png";
+                    string validFileName = Path.GetFileNameWithoutExtension(craftFile);
+                    var thumbFile = KSPUtil.ApplicationRootPath + "thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + validFileName + ".png";
+
                     Texture2D thumbnail;
 
-                    // Following only used for subassemblies because it is somehow corrupting saves by having "host ships" appear
-                    // in flight when regular craft files are done
-#if true
-                    if (cachedTemplate.templateOrigin == TemplateOrigin.SubAssembly)
+                    //
+                    // Make the thumbnail file if it doesn't exist.
+                    // Needed for the subassemblies, will also replace any missing thumbnail files for regular craft
+                    //
+                    if (!File.Exists(thumbFile))
                     {
-                        //
-                        // Make the thumbnail file if it doesn't exist.
-                        // Needed for the subassemblies
-                        //
-                        if (!File.Exists(thumbFile ))
-                        {
-                            ShipConstruct ship = ShipConstruction.LoadShip(craftFile);
-                            ThumbnailHelper.CaptureThumbnail(ship, 256, "thumbs/", HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName);
-                        }
+                        Log.Info("Missing Thumbfile: " + thumbFile);
+                        ShipConstruct ship = ShipConstruction.LoadShip(craftFile);
+                        ThumbnailHelper.CaptureThumbnail(ship, 256, "thumbs/", HighLogic.SaveFolder + "_" + editorFacility + "_" + validFileName);
                     }
-#endif
+
                     if (File.Exists(thumbFile))
                     {
                         thumbnail = new Texture2D(256, 256, TextureFormat.RGBA32, false);

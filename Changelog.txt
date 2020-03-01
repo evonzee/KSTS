@@ -1,5 +1,8 @@
 ChangeLog
 
+2.0.1.2
+	Full fix for the "ghost ships", was caused by invalid characters in the craft file name.
+
 2.0.1.1
 	Fixed "ghost ships" sometimes appearing in flight and in the editor, somehow caused by the thumbnail generation code when used on VAB & SPH craft files
 	Replaced calls to Debug.Log with new class Log, for better control of log messages
