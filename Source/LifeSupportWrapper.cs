@@ -144,19 +144,19 @@ namespace KSTS
                             _previousVesselId.SetValue(kerbalStatus, _currentVesselId.GetValue(kerbalStatus, null), null);
                             _currentVesselId.SetValue(kerbalStatus, vesselId, null);
                             _trackKerbal.Invoke(instance, new object[] { kerbalStatus });
-                            Debug.Log($"{kerbal.name} was prepped for launch using {_lifeSupportManager.Name}, launch times were set to {timeEnteredVessel} seconds UT.");
+                            Log.Warning($"{kerbal.name} was prepped for launch using {_lifeSupportManager.Name}, launch times were set to {timeEnteredVessel} seconds UT.");
                         }
                         catch (NullReferenceException ex)
                         {
                             Debug.LogError($"Failed to prep {kerbal} for launch.");
-                            Debug.LogException(ex);
+                            Log.Exception(ex);
                         }
                     }
                 }
                 catch (NullReferenceException ex)
                 {
                     Debug.LogError($"Failed to prep {vessel} for launch.");
-                    Debug.LogException(ex);
+                    Log.Exception(ex);
                 }
             }
         }

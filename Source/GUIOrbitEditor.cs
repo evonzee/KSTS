@@ -245,13 +245,13 @@ namespace KSTS
                         orbit = CreateOrbit(orbit.inclination, orbit.eccentricity, orbit.semiMajorAxis, orbit.LAN, orbit.argumentOfPeriapsis, orbit.meanAnomalyAtEpoch + adjustedAngle, orbit.epoch, orbit.referenceBody);
 
                         orbitAdjusted = true;
-                        Debug.Log("[KSTS] adjusting planned orbit by " + adjustedAngle + "° to avoid collision with '" + Localizer.Format(vessel.vesselName) + "' (closest approach " + closestApproach.ToString() + "m @ " + UT.ToString() + " after " + iterationCount + " orbits)");
+                        Log.Warning("adjusting planned orbit by " + adjustedAngle + "° to avoid collision with '" + Localizer.Format(vessel.vesselName) + "' (closest approach " + closestApproach.ToString() + "m @ " + UT.ToString() + " after " + iterationCount + " orbits)");
                     }
                 }
                 adjustmentIterations++;
                 if (adjustmentIterations >= 100 && orbitAdjusted)
                 {
-                    Debug.LogError("[KSTS] unable to find a safe orbit after " + adjustmentIterations.ToString() + " iterations, the vessels will likely crash");
+                    Debug.LogError("unable to find a safe orbit after " + adjustmentIterations.ToString() + " iterations, the vessels will likely crash");
                     break;
                 }
             }

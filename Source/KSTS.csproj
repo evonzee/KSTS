@@ -74,6 +74,7 @@
     <Compile Include="FlightRecorder.cs" />
     <Compile Include="GUI.cs" />
     <Compile Include="LifeSupportWrapper.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="MissionController.cs" />
     <Compile Include="OrbitEditor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

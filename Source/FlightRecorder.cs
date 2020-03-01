@@ -122,7 +122,7 @@ namespace KSTS
                 foreach (var resource in part.Resources)
                 {
                     PartResourceDefinition resourceDefinition = null;
-                    if (!KSTS.resourceDictionary.TryGetValue(resource.resourceName.ToString(), out resourceDefinition)) Debug.LogError("[KSTS] RecordingVesselStats.GetStats(): resource '" + resource.resourceName.ToString() + "' not found in dictionary");
+                    if (!KSTS.resourceDictionary.TryGetValue(resource.resourceName.ToString(), out resourceDefinition)) Debug.LogError("RecordingVesselStats.GetStats(): resource '" + resource.resourceName.ToString() + "' not found in dictionary");
                     else
                     {
                         // Cost:
@@ -153,7 +153,7 @@ namespace KSTS
 
                 // The cost of the part is only available in the AvailablePart-class:
                 AvailablePart availablePart = null;
-                if (!KSTS.partDictionary.TryGetValue(partName, out availablePart)) Debug.LogError("[KSTS] RecordingVesselStats.GetStats(): part '" + partName + "' not found in dictionary");
+                if (!KSTS.partDictionary.TryGetValue(partName, out availablePart)) Debug.LogError("RecordingVesselStats.GetStats(): part '" + partName + "' not found in dictionary");
                 else
                 {
                     // The cost of the part already includes the resource-costs, when completely filled:
@@ -410,7 +410,7 @@ namespace KSTS
                     if (amountToDump <= 0) break;
                     var dumpedAmount = part.RequestResource(requestedName, amountToDump);
                     if (dumpedAmount == 0) continue;
-                    Debug.Log("[KSTS] dumped " + dumpedAmount.ToString() + " of " + requestedName.ToString() + " from " + part.name.ToString());
+                    Log.Warning("dumped " + dumpedAmount.ToString() + " of " + requestedName.ToString() + " from " + part.name.ToString());
                     amountToDump -= dumpedAmount;
                     dumpedMass += dumpedAmount * payloadResource.mass;
                     if (KSTS.resourceDictionary.ContainsKey(payloadResource.name)) dumpedFunds += dumpedAmount * KSTS.resourceDictionary[payloadResource.name].unitCost;
@@ -534,7 +534,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] GetDisplayAttributes(): " + e.ToString());
+                Debug.LogError("GetDisplayAttributes(): " + e.ToString());
             }
             return list;
         }
@@ -582,7 +582,7 @@ namespace KSTS
                 {
                     if (flightRecording.Value.status != FlightRecordingStatus.PRELAUNCH)
                     {
-                        Debug.Log("[KSTS] recovered stage " + stageVesselId + " of vessel " + vesselId + " for " + recoveredFunds.ToString() + " funds");
+                        Log.Warning("recovered stage " + stageVesselId + " of vessel " + vesselId + " for " + recoveredFunds.ToString() + " funds");
                         flightRecording.Value.launchCost -= recoveredFunds;
                         if (flightRecording.Value.launchCost < 0) flightRecording.Value.launchCost = 0;
                     }
@@ -606,7 +606,7 @@ namespace KSTS
             // Remove non-existing vessel-IDs from our internal tracking-lists:
             foreach (var removeId in flightRecordings.Keys.Except(existingVesselIds).ToList())
             {
-                Debug.Log("[KSTS] removing flight recording for missing vessel '" + removeId + "'");
+                Log.Warning("removing flight recording for missing vessel '" + removeId + "'");
                 FlightRecorder.flightRecordings.Remove(removeId);
             }
             if (KSTS.stageParentDictionary != null)
@@ -665,7 +665,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] getFlightRecording(): " + e.ToString());
+                Debug.LogError("getFlightRecording(): " + e.ToString());
             }
             return recording;
         }
@@ -682,7 +682,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] StartRecording(): " + e.ToString());
+                Debug.LogError("StartRecording(): " + e.ToString());
             }
         }
 
@@ -698,7 +698,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] CancelRecording(): " + e.ToString());
+                Debug.LogError("CancelRecording(): " + e.ToString());
             }
         }
 
@@ -716,7 +716,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] SaveRecording(): " + e.ToString());
+                Debug.LogError("SaveRecording(): " + e.ToString());
             }
         }
 
@@ -780,14 +780,14 @@ namespace KSTS
 
                     if (blockThis)
                     {
-                        Debug.Log("[KSTS] marking part " + part.name.ToString() + " (" + part.flightID.ToString() + ") as used");
+                        Log.Warning("marking part " + part.name.ToString() + " (" + part.flightID.ToString() + ") as used");
                         recording.usedPartIds.Add(part.flightID.ToString());
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] FlightRecoorder.Timer(): " + e.ToString());
+                Debug.LogError("FlightRecoorder.Timer(): " + e.ToString());
             }
         }
     }

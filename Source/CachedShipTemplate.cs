@@ -37,7 +37,7 @@ namespace KSTS
                 if (!node.HasValue("part")) continue;
                 var partName = node.GetValue("part");
                 partName = Regex.Replace(partName, "_[0-9A-Fa-f]+$", ""); // The name of the part is appended by the UID (eg "Mark2Cockpit_4294755350"), which is numeric, but it won't hurt if we also remove hex-characters here.
-                if (!KSTS.partDictionary.ContainsKey(partName)) { Debug.LogError("[KSTS] part '" + partName + "' not found in global part-directory"); continue; }
+                if (!KSTS.partDictionary.ContainsKey(partName)) { Debug.LogError("part '" + partName + "' not found in global part-directory"); continue; }
                 parts.Add(KSTS.partDictionary[partName]);
             }
             return parts;
@@ -71,7 +71,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] CachedShipTemplate::GetCrewCapacity(): " + e.ToString());
+                Debug.LogError("CachedShipTemplate::GetCrewCapacity(): " + e.ToString());
             }
             return crewCapacity;
         }
@@ -97,7 +97,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] CachedShipTemplate::GetDryMass(): " + e.ToString());
+                Debug.LogError("CachedShipTemplate::GetDryMass(): " + e.ToString());
             }
             return dryMass;
         }

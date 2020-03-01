@@ -351,7 +351,7 @@ namespace KSTS
             {
                 orbitDriver.OnReferenceBodyChange?.Invoke(newOrbit.referenceBody);
             }
-            Debug.Log(
+            Log.Warning(
                 $"Orbit \"{orbitDriver.OrbitDriverToString()}\" changed to: inc={orbit.inclination} ecc={orbit.eccentricity} sma={orbit.semiMajorAxis} lan={orbit.LAN} argpe={orbit.argumentOfPeriapsis} mep={orbit.meanAnomalyAtEpoch} epoch={orbit.epoch} refbody={orbit.referenceBody.CbToString()}"
             );
         }

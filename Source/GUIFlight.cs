@@ -24,7 +24,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] KSTSGUIFlight.OnWindow(): " + e.ToString());
+                Debug.LogError("KSTSGUIFlight.OnWindow(): " + e.ToString());
             }
         }
     }

@@ -25,7 +25,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] KSTSGUITrackingStation.OnWindow(): " + e.ToString());
+                Debug.LogError("KSTSGUITrackingStation.OnWindow(): " + e.ToString());
             }
         }
     }

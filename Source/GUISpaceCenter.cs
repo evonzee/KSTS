@@ -27,7 +27,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] KSTSGUISpaceCenter.OnWindow(): " + e.ToString());
+                Debug.LogError("KSTSGUISpaceCenter.OnWindow(): " + e.ToString());
             }
         }
     }

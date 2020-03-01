@@ -121,7 +121,7 @@ namespace KSTS
                     {
                         if (KSTS.partDictionary.ContainsKey(part.name.ToString()))
                         {
-                            Debug.LogError("[KSTS] duplicate part-name '" + part.name.ToString() + "'");
+                            Debug.LogError("duplicate part-name '" + part.name.ToString() + "'");
                             continue;
                         }
                         KSTS.partDictionary.Add(part.name.ToString(), part);
@@ -147,7 +147,7 @@ namespace KSTS
                 // In case the Stage Recovery Mod is installed, add lists and handlers to track the separation and recovery of stages:
                 if (StageRecoveryAPI.StageRecoveryAvailable && KSTS.stageParentDictionary == null)
                 {
-                    Debug.Log("[KSTS] detected stage recovery mod");
+                    Log.Warning("detected stage recovery mod");
                     stageParentDictionary = new Dictionary<string, string>();
                     StageRecoveryAPI.AddRecoverySuccessEvent((vessel, array, str) =>
                     {
@@ -168,7 +168,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] Awake(): " + e.ToString());
+                Debug.LogError("Awake(): " + e.ToString());
             }
         }
 
@@ -182,7 +182,7 @@ namespace KSTS
         private void onStageSeparation(EventReport data)
         {
             var stageVesselId = data.origin.vessel.id.ToString();
-            Debug.Log("[KSTS] detected stage separation (" + stageVesselId + " from " + lastActiveVesselId + ")");
+            Log.Warning("detected stage separation (" + stageVesselId + " from " + lastActiveVesselId + ")");
             stageParentDictionary.Add(stageVesselId, lastActiveVesselId);
         }
 
@@ -205,7 +205,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] Timer(): " + e.ToString());
+                Debug.LogError("Timer(): " + e.ToString());
             }
         }
 
@@ -274,12 +274,12 @@ namespace KSTS
                         if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead) continue;
                         if (vesselCrewNames.Contains(kerbal.name) && kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Assigned)
                         {
-                            Debug.Log("[KSTS] setting kerbal " + kerbal.name + " from " + kerbal.rosterStatus.ToString() + " to Assigned (see code for more info)");
+                            Log.Warning("setting kerbal " + kerbal.name + " from " + kerbal.rosterStatus.ToString() + " to Assigned (see code for more info)");
                             kerbal.rosterStatus = ProtoCrewMember.RosterStatus.Assigned;
                         }
                         else if (!vesselCrewNames.Contains(kerbal.name) && kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Available)
                         {
-                            Debug.Log("[KSTS] setting kerbal " + kerbal.name + " from " + kerbal.rosterStatus.ToString() + " to Available (see code for more info)");
+                            Log.Warning("setting kerbal " + kerbal.name + " from " + kerbal.rosterStatus.ToString() + " to Available (see code for more info)");
                             kerbal.rosterStatus = ProtoCrewMember.RosterStatus.Available;
                         }
                     }
@@ -290,12 +290,13 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] OnSave(): " + e.ToString());
+                Debug.LogError("OnSave(): " + e.ToString());
             }
         }
 
         public override void OnLoad(ConfigNode node)
         {
+            Log.Warning("KSTS: OnLoad");
             try
             {
                 FlightRecorder.LoadRecordings(node);
@@ -304,7 +305,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] OnLoad(): " + e.ToString());
+                Debug.LogError("OnLoad(): " + e.ToString());
             }
         }
     }

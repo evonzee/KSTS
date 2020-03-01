@@ -76,7 +76,7 @@ namespace KSTS
                 else
                 {
                     helpText = "Help-file not found.";
-                    Debug.Log("helpFilename: " + helpFilename);
+                    Log.Warning("helpFilename: " + helpFilename);
                 }
 
             }
@@ -170,6 +170,7 @@ namespace KSTS
 
         private void GuiOn()
         {
+            Log.Warning("KSTS: GuiOn");
             showGui = true;
             GUI.UpdateShipTemplateCache();
         }
@@ -231,6 +232,8 @@ namespace KSTS
         // Updates the cache we use to store the meta-data of the various ships the player has designed:
         public static void UpdateShipTemplateCache()
         {
+            Log.Warning("KSTS: UpdateShipTemplateCache");
+
             if (GUI.shipTemplates == null) GUI.shipTemplates = new List<CachedShipTemplate>();
             GUI.shipTemplates.Clear();
 
@@ -244,7 +247,7 @@ namespace KSTS
 
             }
             // now read the subassemblies available
-            var shipDirectory2 = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/Subassemblies"; // Directory where the crafts are stored for the current game.             
+            var shipDirectory2 = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/Subassemblies"; // Directory where the subassemblies are stored for the current game.             
             ReadAllCraftFiles("Subassemblies", shipDirectory2);
 
             GUI.shipTemplates.Sort((x, y) => x.template.shipName.CompareTo(y.template.shipName));
@@ -265,24 +268,32 @@ namespace KSTS
                         case "SPH": cachedTemplate.templateOrigin = TemplateOrigin.SPH; break;
                         case "Subassemblies": cachedTemplate.templateOrigin = TemplateOrigin.SubAssembly; break;
                     }
+
                     cachedTemplate.template = ShipConstruction.LoadTemplate(craftFile);
+                    
                     if (cachedTemplate.template == null) continue;
                     if (cachedTemplate.template.shipPartsExperimental || !cachedTemplate.template.shipPartsUnlocked) continue; // We won't bother with ships we can't use anyways.
 
                     // Try to load the thumbnail for this craft:
-                    var thumbFile = KSPUtil.ApplicationRootPath + "/thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName + ".png";
+                    var thumbFile = KSPUtil.ApplicationRootPath + "thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName + ".png";
                     Texture2D thumbnail;
 
-                    //
-                    // Make the thumbnail file if it doesn't exist.
-                    // Needed for the subassemblies, but will also be used if a craft thumbnail is missing
-                    //
-                    if (!File.Exists(thumbFile))
+                    // Following only used for subassemblies because it is somehow corrupting saves by having "host ships" appear
+                    // in flight when regular craft files are done
+#if true
+                    if (cachedTemplate.templateOrigin == TemplateOrigin.SubAssembly)
                     {
-                        ShipConstruct ship = ShipConstruction.LoadShip(craftFile);
-                        ThumbnailHelper.CaptureThumbnail(ship, 256, "thumbs/", HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName);
+                        //
+                        // Make the thumbnail file if it doesn't exist.
+                        // Needed for the subassemblies
+                        //
+                        if (!File.Exists(thumbFile ))
+                        {
+                            ShipConstruct ship = ShipConstruction.LoadShip(craftFile);
+                            ThumbnailHelper.CaptureThumbnail(ship, 256, "thumbs/", HighLogic.SaveFolder + "_" + editorFacility + "_" + cachedTemplate.template.shipName);
+                        }
                     }
-
+#endif
                     if (File.Exists(thumbFile))
                     {
                         thumbnail = new Texture2D(256, 256, TextureFormat.RGBA32, false);
@@ -292,12 +303,13 @@ namespace KSTS
 
                     // The thumbnails are rather large, so we have to resize them first:
                     cachedTemplate.thumbnail = GUI.ResizeTexture(thumbnail, 64, 64);
-
+                    if (thumbnail != null)
+                        Destroy(thumbnail);
                     GUI.shipTemplates.Add(cachedTemplate);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("[KSTS] UpdateShipTemplateCache() processing '" + craftFile + "': " + e.ToString());
+                    Debug.LogError("UpdateShipTemplateCache() processing '" + craftFile + "': " + e.ToString());
                 }
             }
         }
@@ -407,7 +419,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] DrawWindow(): " + e.ToString());
+                Debug.LogError("DrawWindow(): " + e.ToString());
             }
         }
     }

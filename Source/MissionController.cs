@@ -190,7 +190,7 @@ namespace KSTS
                         if (targetVesselId == null || (targetVessel = TargetVessel.GetVesselById((Guid)targetVesselId)) == null || !TargetVessel.IsValidTarget(targetVessel, MissionController.missionProfiles[profileName]))
                         {
                             // Abort mission (maybe the vessel was removed or got moved out of range):
-                            Debug.Log("[KSTS] aborting transport-construction: target-vessel missing or out of range");
+                            Log.Warning("aborting transport-construction: target-vessel missing or out of range");
                             ScreenMessages.PostScreenMessage("Aborting construction-mission: Target-vessel not found at expected rendezvous-coordinates!");
                         }
                         else
@@ -214,7 +214,7 @@ namespace KSTS
                         if (targetVesselId == null || (targetVessel = TargetVessel.GetVesselById((Guid)targetVesselId)) == null || !TargetVessel.IsValidTarget(targetVessel, MissionController.missionProfiles[profileName]))
                         {
                             // Abort mission (maybe the vessel was removed or got moved out of range):
-                            Debug.Log("[KSTS] aborting transport-mission: target-vessel missing or out of range");
+                            Log.Warning("aborting transport-mission: target-vessel missing or out of range");
                             ScreenMessages.PostScreenMessage("Aborting transport-mission: Target-vessel not found at expected rendezvous-coordinates!");
                         }
                         else
@@ -366,7 +366,7 @@ namespace KSTS
                 vessel.SetReferenceTransform(localRoot, true);
             }
 
-            Debug.Log("Vessel assembled for launch: " + Localizer.Format(vessel.vesselName));
+            Log.Warning("Vessel assembled for launch: " + Localizer.Format(vessel.vesselName));
             return vessel;
         }
 
@@ -415,7 +415,7 @@ namespace KSTS
                 AssembleForLaunchUnlanded(shipConstruct, crewToDeliver ?? Enumerable.Empty<string>(), duration, orbit, flagURL, game);
                 var newVessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
                 newVessel.vesselName = shipName;
-                Debug.Log("[KSTS] deployed new ship '" + shipName + "' as '" + newVessel.protoVessel.vesselRef.id + "'");
+                Log.Warning("deployed new ship '" + shipName + "' as '" + newVessel.protoVessel.vesselRef.id + "'");
                 ScreenMessages.PostScreenMessage("Vessel '" + shipName + "' deployed"); // Popup message to notify the player
 
                 // Notify other mods about the new vessel:
@@ -423,7 +423,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] Mission.CreateShip(): " + e);
+                Debug.LogError("Mission.CreateShip(): " + e);
             }
         }
 
@@ -580,7 +580,7 @@ namespace KSTS
         {
             if (MissionController.missionProfiles == null)
             {
-                Debug.Log("[KSTS] MissionController.Initialize");
+                Log.Warning("MissionController.Initialize");
                 MissionController.missionProfiles = new Dictionary<string, MissionProfile>();
             }
 
@@ -633,7 +633,7 @@ namespace KSTS
             profile.profileName = MissionController.GetUniqueProfileName(profile.profileName);
 
             MissionController.missionProfiles.Add(profile.profileName, profile);
-            Debug.Log("[KSTS] saved new mission profile '" + profile.profileName + "'"+ "   Total of " + MissionController.missionProfiles.Count + " missions saved");
+            Log.Warning("saved new mission profile '" + profile.profileName + "'"+ "   Total of " + MissionController.missionProfiles.Count + " missions saved");
         }
 
         public static void DeleteMissionProfile(string name)
@@ -642,14 +642,14 @@ namespace KSTS
             var cancelledMission = missions.RemoveAll(x => x.profileName == name);
             if (cancelledMission > 0)
             {
-                Debug.Log("[KSTS] cancelled " + cancelledMission.ToString() + " missions due to profile-deletion");
+                Log.Warning("cancelled " + cancelledMission.ToString() + " missions due to profile-deletion");
                 ScreenMessages.PostScreenMessage("Cancelled " + cancelledMission.ToString() + " missions!");
             }
 
             // Remove the profile:
             if (MissionController.missionProfiles.ContainsKey(name))
             {
-                Debug.Log("[KSTS] MissionController.DeleteMissionProfile");
+                Log.Warning("MissionController.DeleteMissionProfile");
                 MissionController.missionProfiles.Remove(name);
             }
         }
@@ -662,11 +662,11 @@ namespace KSTS
                 return;
             }
 
-            Debug.Log("[KSTS] MissionController.ChangeMissionProfileName");
+            Log.Warning("MissionController.ChangeMissionProfileName");
             MissionController.missionProfiles.Remove(name);
             profile.profileName = MissionController.GetUniqueProfileName(newName);
             MissionController.missionProfiles.Add(profile.profileName, profile);
-            Debug.Log("[KSTS] MissionController.ChangeMissionProfileName");
+            Log.Warning("MissionController.ChangeMissionProfileName");
         }
 
         public static void LoadMissions(ConfigNode node)
@@ -679,7 +679,7 @@ namespace KSTS
                 {
                     var missionProfile = MissionProfile.CreateFromConfigNode(missionProfileNode);
                     MissionController.missionProfiles.Add(missionProfile.profileName, missionProfile);
-                    Debug.Log("[KSTS] MissionController.LoadMissions");
+                    Log.Warning("MissionController.LoadMissions");
                 }
             }
 
@@ -758,15 +758,15 @@ namespace KSTS
                     catch (Exception e)
                     {
                         // This is serious, but to avoid calling "execute" on every timer-tick, we better remove this mission:
-                        Debug.LogError("[KSTS] FlightRecoorder.Timer().TryExecute(): " + e.ToString());
-                        Debug.LogError("[KSTS] cancelling broken mission");
+                        Debug.LogError("FlightRecoorder.Timer().TryExecute(): " + e.ToString());
+                        Debug.LogError("cancelling broken mission");
                         missions.Remove(mission);
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] FlightRecoorder.Timer(): " + e.ToString());
+                Debug.LogError("FlightRecoorder.Timer(): " + e.ToString());
             }
         }
     }
