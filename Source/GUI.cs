@@ -248,7 +248,8 @@ namespace KSTS
             }
             // now read the subassemblies available
             var shipDirectory2 = KSPUtil.ApplicationRootPath + "/saves/" + HighLogic.SaveFolder + "/Subassemblies"; // Directory where the subassemblies are stored for the current game.             
-            ReadAllCraftFiles("Subassemblies", shipDirectory2);
+            if (Directory.Exists(shipDirectory2))
+                ReadAllCraftFiles("Subassemblies", shipDirectory2);
 
             GUI.shipTemplates.Sort((x, y) => x.template.shipName.CompareTo(y.template.shipName));
         }
@@ -260,7 +261,8 @@ namespace KSTS
             {
                 try
                 {
-                    if (Path.GetFileNameWithoutExtension(craftFile) == "Auto-Saved Ship") continue; // Skip these, they would lead to duplicates, we only use finished crafts.
+                    string validFileName = Path.GetFileNameWithoutExtension(craftFile);
+                    if (validFileName == "Auto-Saved Ship") continue; // Skip these, they would lead to duplicates, we only use finished crafts.
                     var cachedTemplate = new CachedShipTemplate();
                     switch (editorFacility)
                     {
@@ -275,7 +277,6 @@ namespace KSTS
                     if (cachedTemplate.template.shipPartsExperimental || !cachedTemplate.template.shipPartsUnlocked) continue; // We won't bother with ships we can't use anyways.
 
                     // Try to load the thumbnail for this craft:
-                    string validFileName = Path.GetFileNameWithoutExtension(craftFile);
                     var thumbFile = KSPUtil.ApplicationRootPath + "thumbs/" + HighLogic.SaveFolder + "_" + editorFacility + "_" + validFileName + ".png";
 
                     Texture2D thumbnail;

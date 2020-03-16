@@ -1,5 +1,8 @@
 ChangeLog
 
+2.0.1.3
+	Added check for existance of Subassemblies folder to avoid an error if it doesn't exist
+
 2.0.1.2
 	Full fix for the "ghost ships", was caused by invalid characters in the craft file name.
 
