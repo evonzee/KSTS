@@ -37,10 +37,7 @@ namespace KSTS
         public static void CaptureThumbnail(ShipConstruct ship, int resolution,
                 float elevation, float azimuth, float pitch, float heading, float fov, string saveFolder, string craftName)
         {
-            //Log.Info("CaptureThumbnail  elevation: " + elevation.ToString() + "  azimuth: " + azimuth.ToString() + "pitch: " + pitch.ToString() +
-            //"   heading: " + heading.ToString() + "  fov: " + fov.ToString());
             CraftThumbnail.TakeSnaphot(ship, resolution, saveFolder, craftName, elevation, azimuth, pitch, heading, fov);
-
         }
 #if false
 		/// <summary>

@@ -257,6 +257,8 @@ namespace KSTS
 
         static void ReadAllCraftFiles(string editorFacility, string shipDirectory)
         {
+            if (HighLogic.LoadedSceneIsFlight)
+
             foreach (var craftFile in Directory.GetFiles(shipDirectory, "*.craft"))
             {
                 try
@@ -281,27 +283,35 @@ namespace KSTS
 
                     Texture2D thumbnail;
 
-                    //
-                    // Make the thumbnail file if it doesn't exist.
-                    // Needed for the subassemblies, will also replace any missing thumbnail files for regular craft
-                    //
-                    if (!File.Exists(thumbFile))
-                    {
-                        Log.Info("Missing Thumbfile: " + thumbFile);
-                        ShipConstruct ship = ShipConstruction.LoadShip(craftFile);
-                        ThumbnailHelper.CaptureThumbnail(ship, 256, "thumbs/", HighLogic.SaveFolder + "_" + editorFacility + "_" + validFileName);
-                    }
+                        //
+                        // Make the thumbnail file if it doesn't exist.
+                        // Needed for the subassemblies, will also replace any missing thumbnail files for regular craft
+                        //
+                        if (!HighLogic.LoadedSceneIsFlight)
+                        {
+                            if (!File.Exists(thumbFile))
+                            {
+                                Log.Info("Missing Thumbfile: " + thumbFile);
+                                ShipConstruct ship = ShipConstruction.LoadShip(craftFile);
+                                ThumbnailHelper.CaptureThumbnail(ship, 256, "thumbs/", HighLogic.SaveFolder + "_" + editorFacility + "_" + validFileName);
+                            }
+                        }
 
+                    bool placeholder = false;
                     if (File.Exists(thumbFile))
                     {
                         thumbnail = new Texture2D(256, 256, TextureFormat.RGBA32, false);
                         thumbnail.LoadImage(File.ReadAllBytes(thumbFile));
                     }
-                    else thumbnail = placeholderImage;
+                    else
+                    {
+                        thumbnail = placeholderImage;
+                        placeholder = true;
+                    }
 
                     // The thumbnails are rather large, so we have to resize them first:
                     cachedTemplate.thumbnail = GUI.ResizeTexture(thumbnail, 64, 64);
-                    if (thumbnail != null)
+                    if (!placeholder)
                         Destroy(thumbnail);
                     GUI.shipTemplates.Add(cachedTemplate);
                 }
