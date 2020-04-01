@@ -1,5 +1,8 @@
 ChangeLog
 
+2.0.1.5
+	Removed leftover line at beginning of ReadAllCraftFiles:   if (HighLogic.LoadedSceneIsFlight)
+
 2.0.1.4
 	Another fix for the ghost ships, caused when loaded a subassembly while in the light scene
 

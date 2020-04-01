@@ -257,8 +257,6 @@ namespace KSTS
 
         static void ReadAllCraftFiles(string editorFacility, string shipDirectory)
         {
-            if (HighLogic.LoadedSceneIsFlight)
-
             foreach (var craftFile in Directory.GetFiles(shipDirectory, "*.craft"))
             {
                 try
