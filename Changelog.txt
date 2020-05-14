@@ -1,5 +1,9 @@
 ChangeLog
 
+2.0.1.6
+	Fixed issue with selection of a ship selecting the nth ship 
+	Changed a few foreach's to for (int i = 0...) for efficiency
+
 2.0.1.5
 	Removed leftover line at beginning of ReadAllCraftFiles:   if (HighLogic.LoadedSceneIsFlight)
 

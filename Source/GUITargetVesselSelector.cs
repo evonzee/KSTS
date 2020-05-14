@@ -63,8 +63,10 @@ namespace KSTS
                 var contents = new List<GUIContent>();
                 var filteredIndices = new List<int>(); // Target-vessels which fall out of the defined filters will get noted here.
                 var index = 0;
-                foreach (var vessel in validTargets)
+                for (int i = 0; i < validTargets.Count; i++)
                 {
+                    var vessel = validTargets[i];
+                
                     var filterThisTarget = false;
                     if (!TargetVessel.IsValidTarget(vessel)) continue;
                     var descriptions = new List<string>();
