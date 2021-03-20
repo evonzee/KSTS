@@ -6,13 +6,20 @@ namespace KSTS
 {
     // Helper-Class to draw the window in the flight scene:
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    public class GUIFlight : UnityEngine.MonoBehaviour
+    public class GUIFlight : MonoBehaviour
     {
+        static int winId;
+
+        public void Start()
+        {
+            Mission.InitKAC();
+            winId = SpaceTuxUtility.WindowHelper.NextWindowId("KSPS.GUIFlight");
+        }
         public void OnGUI()
         {
             if (GUI.showGui)
             {
-                GUI.windowPosition = ClickThruBlocker.GUILayoutWindow(100, GUI.windowPosition, OnWindow, "", GUI.windowStyle);
+                GUI.windowPosition = ClickThruBlocker.GUILayoutWindow(winId, GUI.windowPosition, OnWindow, "", GUI.windowStyle);
             }
         }
 

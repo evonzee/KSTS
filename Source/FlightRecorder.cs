@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using StageRecovery;
 using KSP.Localization;
+using static KSTS.Statics;
 
 namespace KSTS
 {

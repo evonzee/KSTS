@@ -10,6 +10,7 @@ using KSP.Localization;
 
 using ToolbarControl_NS;
 using ClickThroughFix;
+using static KSTS.Statics;
 
 namespace KSTS
 {
@@ -81,15 +82,6 @@ namespace KSTS
 
             }
 
-
-
-#if false
-            // Add event-handlers to create and destroy our button:
-            GameEvents.onGUIApplicationLauncherReady.Remove(ReadyEvent);
-            GameEvents.onGUIApplicationLauncherReady.Add(ReadyEvent);
-            GameEvents.onGUIApplicationLauncherDestroyed.Remove(DestroyEvent);
-            GameEvents.onGUIApplicationLauncherDestroyed.Add(DestroyEvent);
-#endif
             DontDestroyOnLoad(this);
         }
 
@@ -125,40 +117,6 @@ namespace KSTS
             );
 
         }
-#if false
-        // Fires when a scene is ready so we can install our button.
-        public void ReadyEvent()
-        {
-            if (ApplicationLauncher.Ready && button == null)
-            {
-                var visibleScense = ApplicationLauncher.AppScenes.SPACECENTER | 
-                    ApplicationLauncher.AppScenes.TRACKSTATION | 
-                    ApplicationLauncher.AppScenes.FLIGHT;
-                button = ApplicationLauncher.Instance.AddModApplication(GuiOn, GuiOff, null, null, null, null, visibleScense, buttonIcon);
-            }
-
-            // For reasons unknown the styles cannot be initialized in the constructor, only when the application is ready, probably because the
-            // skin needs more time to load:
-            if (ApplicationLauncher.Ready)
-            {
-                labelStyle = new GUIStyle("Label");
-                buttonStyle = new GUIStyle("Button");
-                normalGUIbackground = UnityEngine.GUI.backgroundColor;
-                textFieldStyle = new GUIStyle("TextField");
-                scrollStyle = HighLogic.Skin.scrollView;
-                selectionGridStyle = new GUIStyle(GUI.buttonStyle) { richText = true, fontStyle = FontStyle.Normal, alignment = TextAnchor.UpperLeft };
-            }
-        }
-
-        // Fires when a scene is unloaded and we should destroy our button:
-        public void DestroyEvent()
-        {
-            if (button == null) return;
-            ApplicationLauncher.Instance.RemoveModApplication(button);
-            button = null;
-            showGui = false;
-        }
-#endif
 
         void NoOnDestroy()
         {

@@ -14,6 +14,8 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
+using static KSTS.Statics;
+
 namespace KSTS
 {
     [KSPAddon(KSPAddon.Startup.Instantly, true)]

@@ -7,6 +7,9 @@ using System.IO;
 using System.Linq;
 using KSP.UI.Screens.DebugToolbar.Screens.Cheats;
 using KSP.Localization;
+using static KSTS.Statics;
+using KSTS_KACWrapper;
+
 
 namespace KSTS
 {
@@ -31,6 +34,16 @@ namespace KSTS
         public Dictionary<string, double> resourcesToDeliver = null; // ResourceName => ResourceAmount
         public string flagURL = null;              // The flag to be used for newly created vessels
 
+        static bool inittedKAC = false;
+        static bool KACavail = false;
+        internal static void InitKAC()
+        {
+            if (!inittedKAC)
+            {
+                KACavail = KACWrapper.InitKACWrapper();
+                inittedKAC = true;
+            }
+        }
         public MissionProfile GetProfile()
         {
             if (MissionController.missionProfiles.ContainsKey(profileName))
@@ -85,8 +98,25 @@ namespace KSTS
                 profileName = profile.profileName,
                 eta = Planetarium.GetUniversalTime() + profile.missionDuration,
                 crewToDeliver = crew,
-                flagURL = flagURL
+                flagURL = flagURL,
+
             };
+            if (KACWrapper.APIReady)
+            {
+                var KACalarmID = KACWrapper.KAC.CreateAlarm(
+                                KACWrapper.KACAPI.AlarmTypeEnum.Raw,
+                                "Deployment: " + shipName,
+                                mission.eta
+                            );
+                var a = KACWrapper.KAC.Alarms.FirstOrDefault(z => z.ID == KACalarmID);
+                if (a != null)
+                {
+                    a.AlarmAction = KACWrapper.KACAPI.AlarmActionEnum.KillWarp;
+                    a.AlarmMargin = 0;
+                    //a.VesselID = FlightGlobals.ActiveVessel.id.ToString();
+                    a.Notes = "Vessel deployment of " + shipName + " by Kerbal Space Transport System";
+                }
+            }
             // The filename contains silly portions like "KSP_x64_Data/..//saves", which break savegames because "//" starts a comment in the savegame ...
             // The crew we want the new vessel to start with.
 
@@ -103,6 +133,7 @@ namespace KSTS
                 targetVesselId = target.protoVessel.vesselID
             };
 
+            string transport = "";
             if (resources != null)
             {
                 mission.resourcesToDeliver = new Dictionary<string, double>();
@@ -111,6 +142,10 @@ namespace KSTS
                     if (resource.amount > 0)
                     {
                         mission.resourcesToDeliver.Add(resource.name, resource.amount);
+                        if (transport == "")
+                            transport = resource.name;
+                        else
+                            transport += ", " + resource.name;
                     }
                 }
             }
@@ -127,6 +162,12 @@ namespace KSTS
                             }
 
                             mission.crewToDeliver.Add(crewTransfer.kerbalName);
+
+                            if (transport == "")
+                                transport = crewTransfer.kerbalName;
+                            else
+                                transport += ", " + crewTransfer.kerbalName;
+
                             break;
                         case CrewTransferOrder.CrewTransferDirection.COLLECT:
                             if (mission.crewToCollect == null)
@@ -135,10 +176,35 @@ namespace KSTS
                             }
 
                             mission.crewToCollect.Add(crewTransfer.kerbalName);
+
+                            mission.crewToDeliver.Add(crewTransfer.kerbalName);
+
+                            if (transport == "")
+                                transport = crewTransfer.kerbalName;
+                            else
+                                transport += ", " + crewTransfer.kerbalName;
+
                             break;
                         default:
                             throw new Exception("unknown transfer-direction: '" + crewTransfer.direction.ToString() + "'");
                     }
+                }
+            }
+
+            if (KACWrapper.APIReady)
+            {
+                var KACalarmID = KACWrapper.KAC.CreateAlarm(
+                                KACWrapper.KACAPI.AlarmTypeEnum.Raw,
+                                "Transport",
+                                mission.eta
+                            );
+                var a = KACWrapper.KAC.Alarms.FirstOrDefault(z => z.ID == KACalarmID);
+                if (a != null)
+                {
+                    a.AlarmAction = KACWrapper.KACAPI.AlarmActionEnum.KillWarp;
+                    a.AlarmMargin = 0;
+                    //a.VesselID = FlightGlobals.ActiveVessel.id.ToString();
+                    a.Notes = "Transport " + transport +" to " + target.protoVessel.GetDisplayName() + " by Kerbal Space Transport System";
                 }
             }
 
@@ -159,6 +225,23 @@ namespace KSTS
                 flagURL = flagURL
             };
             // The crew we want the new vessel to start with.
+
+            if (KACWrapper.APIReady)
+            {
+                var KACalarmID = KACWrapper.KAC.CreateAlarm(
+                                KACWrapper.KACAPI.AlarmTypeEnum.Raw,
+                                "Construction: " + shipName,
+                                mission.eta
+                            );
+                var a = KACWrapper.KAC.Alarms.FirstOrDefault(z => z.ID == KACalarmID);
+                if (a != null)
+                {
+                    a.AlarmAction = KACWrapper.KACAPI.AlarmActionEnum.KillWarp;
+                    a.AlarmMargin = 0;
+                    //a.VesselID = FlightGlobals.ActiveVessel.id.ToString();
+                    a.Notes = "Construction of " + shipName + " by Kerbal Space Transport System";
+                }
+            }
 
             return mission;
         }
@@ -324,8 +407,8 @@ namespace KSTS
                 pCrewMembers.ForEach(pcm =>
                 {
                     pcm.rosterStatus = ProtoCrewMember.RosterStatus.Assigned;
-                    // Add the phases the kerbonaut would have gone through during his launch to his flight-log:
-                    var homeBody = Planetarium.fetch.Home;
+                // Add the phases the kerbonaut would have gone through during his launch to his flight-log:
+                var homeBody = Planetarium.fetch.Home;
                     pcm.flightLog.AddEntry(FlightLog.EntryType.Launch, homeBody.bodyName);
                     pcm.flightLog.AddEntry(FlightLog.EntryType.Flight, homeBody.bodyName);
                     pcm.flightLog.AddEntry(FlightLog.EntryType.Suborbit, homeBody.bodyName);
@@ -600,7 +683,7 @@ namespace KSTS
                 name = "KSTS";
             }
 
-             var postfixNumber = 0;
+            var postfixNumber = 0;
             var uniqueName = name;
             var lowercase = name.ToLower() == name; // If the name is in all lowercase, we don't want to break it by adding uppercase letters
             while (MissionController.missionProfiles.ContainsKey(uniqueName))
@@ -633,7 +716,7 @@ namespace KSTS
             profile.profileName = MissionController.GetUniqueProfileName(profile.profileName);
 
             MissionController.missionProfiles.Add(profile.profileName, profile);
-            Log.Warning("saved new mission profile '" + profile.profileName + "'"+ "   Total of " + MissionController.missionProfiles.Count + " missions saved");
+            Log.Warning("saved new mission profile '" + profile.profileName + "'" + "   Total of " + MissionController.missionProfiles.Count + " missions saved");
         }
 
         public static void DeleteMissionProfile(string name)

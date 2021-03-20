@@ -5,6 +5,9 @@ using System.Reflection;
 using System.Collections.Generic;
 using StageRecovery;
 
+using static KSTS.Statics;
+
+
 namespace KSTS
 {
     public class Saveable

@@ -9,13 +9,21 @@ namespace KSTS
 
     // Helper-Class to draw the window in the space-center scene:
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
-    public class GUISpaceCenter : UnityEngine.MonoBehaviour
+    public class GUISpaceCenter : MonoBehaviour
     {
+        static int winId;
+
+        public void Start()
+        {
+            Mission.InitKAC();
+            winId = SpaceTuxUtility.WindowHelper.NextWindowId("KSPS.GUISpaceCenter");
+        }
+
         public void OnGUI()
         {
             if (GUI.showGui)
             {
-                GUI.windowPosition = ClickThruBlocker.GUILayoutWindow(100, GUI.windowPosition, OnWindow, "", GUI.windowStyle);
+                GUI.windowPosition = ClickThruBlocker.GUILayoutWindow(winId, GUI.windowPosition, OnWindow, "", GUI.windowStyle);
             }
         }
 
