@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP.Localization;
+using static KSTS.Statics;
 
 namespace KSTS
 {
@@ -26,7 +28,7 @@ namespace KSTS
             if (vessel.situation != Vessel.Situations.ORBITING) return false;
             if (vessel.orbit == null) return false;
 
-            List<string> dockingPortTypes = GetVesselDockingPortTypes(vessel);
+            var dockingPortTypes = GetVesselDockingPortTypes(vessel);
             if (dockingPortTypes.Count == 0) return false; // We have to dock for a transport-mission.
             
             if (profile == null)
@@ -56,16 +58,16 @@ namespace KSTS
         // Returns whih types of docking-ports the given vessel (like "node0", "node1", etc):
         public static List<string> GetVesselDockingPortTypes(Vessel vessel)
         {
-            List<string> dockingPortTypes = new List<string>();
+            var dockingPortTypes = new List<string>();
             try
             {
                 // To get this function to work with vessels even if they are not loaded, we have to check then proto-parts, which more complicated:
-                foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots)
+                foreach (var protoPart in vessel.protoVessel.protoPartSnapshots)
                 {
                     if (!KSTS.partDictionary.ContainsKey(protoPart.partName)) continue;
-                    AvailablePart part = KSTS.partDictionary[protoPart.partName];
+                    var part = KSTS.partDictionary[protoPart.partName];
                     if (part.partPrefab == null) continue;
-                    foreach (ModuleDockingNode dockingNode in part.partPrefab.FindModulesImplementing<ModuleDockingNode>())
+                    foreach (var dockingNode in part.partPrefab.FindModulesImplementing<ModuleDockingNode>())
                     {
                         if (!dockingPortTypes.Contains(dockingNode.nodeType)) dockingPortTypes.Add(dockingNode.nodeType);
                     }
@@ -73,7 +75,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] GetVesselDockingPortTypes(" + vessel.vesselName.ToString() + "): " + e.ToString());
+                Debug.LogError("GetVesselDockingPortTypes(" + Localizer.Format(vessel.vesselName)+ "): " + e.ToString());
             }
             return dockingPortTypes;
         }
@@ -81,22 +83,22 @@ namespace KSTS
         // Returns a list of resources which the given vessel has available capacity to receive in an transport-mission:
         public static List<PayloadResource> GetFreeResourcesCapacities(Vessel vessel)
         {
-            List<PayloadResource> availableResources = new List<PayloadResource>();
+            var availableResources = new List<PayloadResource>();
             try
             {
-                foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots)
+                foreach (var protoPart in vessel.protoVessel.protoPartSnapshots)
                 {
-                    foreach (ProtoPartResourceSnapshot protoResource in protoPart.resources)
+                    foreach (var protoResource in protoPart.resources)
                     {
                         // We manipulate resources of unloaded vessels in "AddResources" below, which does not update "protoResource.amount", so we have
                         // to read the config-node here:
-                        double free = protoResource.maxAmount - protoResource.amount;
+                        var free = protoResource.maxAmount - protoResource.amount;
                         if (free < 0.01) continue; // Too small amounts would get shown as 0.00, which would be confusing, so we ignore them just like 0.
                         if (!KSTS.resourceDictionary.ContainsKey(protoResource.resourceName)) continue;
-                        PartResourceDefinition resource = KSTS.resourceDictionary[protoResource.resourceName];
+                        var resource = KSTS.resourceDictionary[protoResource.resourceName];
                         if (resource.density <= 0) continue;
 
-                        PayloadResource availableResource = availableResources.Find(x => x.name == protoResource.resourceName);
+                        var availableResource = availableResources.Find(x => x.name == protoResource.resourceName);
                         if (availableResource != null)
                         {
                             availableResource.amount += free;
@@ -114,7 +116,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] GetFreeResourcesCapacities(" + vessel.vesselName.ToString() + "): " + e.ToString());
+                Debug.LogError("GetFreeResourcesCapacities(" + Localizer.Format(vessel.vesselName) + "): " + e.ToString());
             }
             return availableResources;
         }
@@ -122,8 +124,8 @@ namespace KSTS
         // Returns the number of seats of the given vessel, even if it is not loaded:
         public static int GetCrewCapacity(Vessel vessel)
         {
-            int capacity = 0;
-            foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots)
+            var capacity = 0;
+            foreach (var protoPart in vessel.protoVessel.protoPartSnapshots)
             {
                 if (!KSTS.partDictionary.ContainsKey(protoPart.partName)) continue;
                 capacity += KSTS.partDictionary[protoPart.partName].partPrefab.CrewCapacity;
@@ -142,11 +144,11 @@ namespace KSTS
         // function is more accurate to work with until the vessel has been active and was re-packed by KSP.
         public static List<ProtoCrewMember> GetCrew(Vessel vessel)
         {
-            List<ProtoCrewMember> crew = new List<ProtoCrewMember>();
-            foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots)
+            var crew = new List<ProtoCrewMember>();
+            foreach (var protoPart in vessel.protoVessel.protoPartSnapshots)
             {
                 if (protoPart.protoModuleCrew == null) continue;
-                foreach (ProtoCrewMember crewMember in protoPart.protoModuleCrew)
+                foreach (var crewMember in protoPart.protoModuleCrew)
                 {
                     crew.Add(crewMember);
                 }
@@ -157,8 +159,8 @@ namespace KSTS
         // Returns the number of crew-members that have a given trait (eg "Pilot"):
         public static int GetCrewCountWithTrait(Vessel vessel, string trait)
         {
-            int traitCount = 0;
-            foreach (ProtoCrewMember crewMember in TargetVessel.GetCrew(vessel))
+            var traitCount = 0;
+            foreach (var crewMember in TargetVessel.GetCrew(vessel))
             {
                 if (crewMember.trait == trait) traitCount++;
             }
@@ -174,13 +176,13 @@ namespace KSTS
             float partHeights = 0;
             try
             {
-                foreach (ProtoPartSnapshot pps in vessel.protoVessel.protoPartSnapshots)
+                foreach (var pps in vessel.protoVessel.protoPartSnapshots)
                 {
                     if (KSTS.partDictionary.ContainsKey(pps.partName))
                     {
                         // I guess the iconScale is the length of the 1m indicator in the editor next to the icon of the part. This means the inverse will give us the
                         // the actual height of the part, hopefully no part will be wider than heigh (in this case I hope the part will be displayed rotated in the editor):
-                        float partHeight = 1 / KSTS.partDictionary[pps.partName].iconScale;
+                        var partHeight = 1 / KSTS.partDictionary[pps.partName].iconScale;
                         partHeights += partHeight;
                     }
                 }
@@ -189,7 +191,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] TargetVessel.GetVesselSize(" + vessel.vesselName + "): " + e.ToString());
+                Debug.LogError("TargetVessel.GetVesselSize(" + Localizer.Format(vessel.vesselName) + "): " + e.ToString());
                 return 1000; // If we can't tell, lets make it 1km to be safe
             }
         }
@@ -203,15 +205,15 @@ namespace KSTS
             if (vessel.loaded) throw new Exception("TargetVessel.AddResources can only be called on unloaded vessels");
             try
             {
-                double amountToAdd = amount;
-                foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots)
+                var amountToAdd = amount;
+                foreach (var protoPart in vessel.protoVessel.protoPartSnapshots)
                 {
                     if (amountToAdd <= 0) break;
-                    foreach (ProtoPartResourceSnapshot protoResource in protoPart.resources)
+                    foreach (var protoResource in protoPart.resources)
                     {
                         if (protoResource.resourceName != resourceName) continue;
-                        double partAmount = protoResource.amount; 
-                        double capacity = protoResource.maxAmount - partAmount;
+                        var partAmount = protoResource.amount; 
+                        var capacity = protoResource.maxAmount - partAmount;
                         if (capacity <= 0) continue;
                         if (capacity > amountToAdd)
                         {
@@ -231,12 +233,12 @@ namespace KSTS
                 GameEvents.onVesselWasModified.Fire(vessel);
 
                 // Log Message about the transfer:
-                Debug.Log("[KSTS] added " + (amount - amountToAdd).ToString() + " / " + amount.ToString() + " of " + resourceName + " to " + vessel.vesselName);
-                ScreenMessages.PostScreenMessage(vessel.vesselName + " received " + Math.Round(amount + amountToAdd).ToString() + " of " + resourceName);
+                Log.Warning("added " + (amount - amountToAdd).ToString() + " / " + amount.ToString() + " of " + resourceName + " to " + Localizer.Format(vessel.vesselName));
+                ScreenMessages.PostScreenMessage(Localizer.Format(vessel.vesselName) + " received " + Math.Round(amount + amountToAdd).ToString() + " of " + resourceName);
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] TargetVessel.AddResources("+vessel.vesselName+","+resourceName+","+amount.ToString()+"): " + e.ToString());
+                Debug.LogError("TargetVessel.AddResources("+ Localizer.Format(vessel.vesselName) + ","+resourceName+","+amount.ToString()+"): " + e.ToString());
             }
         }
 
@@ -244,12 +246,12 @@ namespace KSTS
         public static void AddCrewMember(Vessel vessel, string kerbonautName)
         {
             // We can only manipulate the crew of an unloaded ship:
-            if (vessel.loaded) throw new Exception("TargetVessel.AddCrewMember can only be called on unloaded vessels");
+            // if (vessel.loaded) throw new Exception("TargetVessel.AddCrewMember can only be called on unloaded vessels");
             try
             {
                 // Find the requested Kerbal on the crew-roster:
                 ProtoCrewMember kerbonaut = null;
-                foreach (ProtoCrewMember rosterKerbonaut in GUICrewTransferSelector.GetCrewRoster())
+                foreach (var rosterKerbonaut in GUICrewTransferSelector.GetCrewRoster())
                 {
                     if (rosterKerbonaut.name == kerbonautName)
                     {
@@ -260,17 +262,17 @@ namespace KSTS
                 if (kerbonaut == null)
                 {
                     // The player must have removed the kerbal from the pool of available kerbonauts:
-                    Debug.Log("[KSTS] unable to complete crew-transfer to " + vessel.vesselName + ", kerbonaut " + kerbonautName + " unavailable or missiong");
-                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Kerbonaut " + kerbonautName + " unavailable for transfer to " + vessel.vesselName);
+                    Log.Warning("unable to complete crew-transfer to " + Localizer.Format(vessel.vesselName) + ", kerbonaut " + kerbonautName + " unavailable or missiong");
+                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Kerbonaut " + kerbonautName + " unavailable for transfer to " + Localizer.Format(vessel.vesselName));
                     return;
                 }
 
                 // Find an available seat on the target-vessel:
                 ProtoPartSnapshot targetPart = null;
-                foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots)
+                foreach (var protoPart in vessel.protoVessel.protoPartSnapshots)
                 {
                     if (!KSTS.partDictionary.ContainsKey(protoPart.partName)) continue;
-                    int crewCapacity = KSTS.partDictionary[protoPart.partName].partPrefab.CrewCapacity;
+                    var crewCapacity = KSTS.partDictionary[protoPart.partName].partPrefab.CrewCapacity;
                     if (crewCapacity <= 0) continue;
                     if (protoPart.protoCrewNames.Count >= crewCapacity) continue;
                     targetPart = protoPart;
@@ -279,18 +281,18 @@ namespace KSTS
                 if (targetPart == null)
                 {
                     // Maybe there was a different transport-mission to the same target-vessel:
-                    Debug.Log("[KSTS] unable to complete crew-transfer to " + vessel.vesselName + ", no free seats");
-                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Vessel " + vessel.vesselName + " had no free seat for Kerbonaut " + kerbonautName);
+                    Log.Warning("unable to complete crew-transfer to " + Localizer.Format(vessel.vesselName) + ", no free seats");
+                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Vessel " + Localizer.Format(vessel.vesselName) + " had no free seat for Kerbonaut " + kerbonautName);
                     return;
                 }
 
                 // Add the kerbonaut to the selected part, using the next available seat:
-                int seatIdx = 0;
+                var seatIdx = 0;
                 bool seatSwitched;
                 do
                 {
                     seatSwitched = false;
-                    foreach (ProtoCrewMember crewMember in targetPart.protoModuleCrew)
+                    foreach (var crewMember in targetPart.protoModuleCrew)
                     {
                         if (seatIdx == crewMember.seatIdx) { seatIdx++; seatSwitched = true; }
                     }
@@ -300,9 +302,9 @@ namespace KSTS
                 targetPart.protoCrewNames.Add(kerbonautName);
 
                 // Remove kerbonaut from crew-roster:
-                kerbonaut.rosterStatus = ProtoCrewMember.RosterStatus.Assigned;
                 kerbonaut.seatIdx = seatIdx;
 
+                kerbonaut.rosterStatus = ProtoCrewMember.RosterStatus.Assigned;
                 // Add the phases the kerbonaut would have gone through during his launch to his flight-log:
                 kerbonaut.flightLog.AddEntry(FlightLog.EntryType.Launch, Planetarium.fetch.Home.bodyName);
                 kerbonaut.flightLog.AddEntry(FlightLog.EntryType.Flight, Planetarium.fetch.Home.bodyName);
@@ -312,12 +314,12 @@ namespace KSTS
                 // Notyfy other mods about the modification of the vessel's crew:
                 GameEvents.onVesselCrewWasModified.Fire(vessel);
 
-                Debug.Log("[KSTS] added kerbonaut " + kerbonautName + " to vessel " + vessel.vesselName);
-                ScreenMessages.PostScreenMessage("Kerbonaut " + kerbonautName + " transfered to " + vessel.vesselName);
+                Log.Warning("added kerbonaut " + kerbonautName + " to vessel " + Localizer.Format(vessel.vesselName));
+                ScreenMessages.PostScreenMessage("Kerbonaut " + kerbonautName + " transfered to " + Localizer.Format(vessel.vesselName));
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] TargetVessel.AddCrewMember(" + vessel.vesselName + "," + kerbonautName + "): " + e.ToString());
+                Debug.LogError("TargetVessel.AddCrewMember(" + Localizer.Format(vessel.vesselName) + "," + kerbonautName + "): " + e.ToString());
             }
         }
 
@@ -331,7 +333,7 @@ namespace KSTS
                 // Find the part in which the kerbonaut is currently sitting:
                 ProtoPartSnapshot sourcePart = null;
                 ProtoCrewMember kerbonaut = null;
-                foreach (ProtoPartSnapshot protoPart in vessel.protoVessel.protoPartSnapshots)
+                foreach (var protoPart in vessel.protoVessel.protoPartSnapshots)
                 {
                     if (protoPart.protoCrewNames.Contains(kerbonautName))
                     {
@@ -343,8 +345,8 @@ namespace KSTS
                 if (sourcePart == null || kerbonaut == null)
                 {
                     // Maybe the plaayer has removed the kerbal from the vessel (eg EVA, docking, etc):
-                    Debug.Log("[KSTS] unable to recover kerbonaut "+kerbonautName+" from vessel "+vessel.vesselName+", kerbal not found on board");
-                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Kerbonaut " + kerbonautName + " not present on " + vessel.vesselName);
+                    Log.Warning("unable to recover kerbonaut "+kerbonautName+" from vessel "+ Localizer.Format(vessel.vesselName) + ", kerbal not found on board");
+                    ScreenMessages.PostScreenMessage("Crew-Transfer aborted: Kerbonaut " + kerbonautName + " not present on " + Localizer.Format(vessel.vesselName));
                     return;
                 }
 
@@ -363,12 +365,12 @@ namespace KSTS
                 // Notyfy other mods about the modification of the vessel's crew:
                 GameEvents.onVesselCrewWasModified.Fire(vessel);
 
-                Debug.Log("[KSTS] recovered kerbonaut " + kerbonautName + " from vessel " + vessel.vesselName);
-                ScreenMessages.PostScreenMessage("Kerbonaut " + kerbonautName + " recovered from " + vessel.vesselName);
+                Log.Warning("recovered kerbonaut " + kerbonautName + " from vessel " + Localizer.Format(vessel.vesselName));
+                ScreenMessages.PostScreenMessage("Kerbonaut " + kerbonautName + " recovered from " + Localizer.Format(vessel.vesselName));
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] TargetVessel.RecoverCrewMember(" + vessel.vesselName + "," + kerbonautName + "): " + e.ToString());
+                Debug.LogError("TargetVessel.RecoverCrewMember(" + Localizer.Format(vessel.vesselName) + "," + kerbonautName + "): " + e.ToString());
             }
         }
     }

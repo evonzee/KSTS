@@ -9,18 +9,17 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>KSTS</RootNamespace>
     <AssemblyName>KSTS</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>portable</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,103 +28,63 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="$(KSPDIR)\KSP_x64_Data\Managed\Assembly*.dll">
-      <Private>False</Private>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\ksp_binaries\1.4.3\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="$(KSPDIR)\KSP_x64_Data\Managed\UnityEngine*.dll">
-      <Private>False</Private>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\build\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="ClickThroughBlocker">
-      <HintPath>$(KSPDIR)\GameData\000_ClickThroughBlocker\Plugins\ClickThroughBlocker.dll</HintPath>
+    <Reference Include="KSPAssets">
+      <HintPath>..\..\ksp_binaries\1.4.3\KSPAssets.dll</HintPath>
     </Reference>
-    <Reference Include="KSP_Log">
-      <HintPath>$(KSPDIR)\GameData\SpaceTuxLibrary\Plugins\KSP_Log.dll</HintPath>
-    </Reference>
-    <Reference Include="SpaceTuxUtility">
-      <HintPath>$(KSPDIR)\GameData\SpaceTuxLibrary\Plugins\SpaceTuxUtility.dll</HintPath>
+    <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\build\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="ToolbarControl">
-      <HintPath>$(KSPDIR)\GameData\001_ToolbarControl\Plugins\ToolbarControl.dll</HintPath>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\ksp_binaries\1.4.3\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\ksp_binaries\1.4.3\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyVersion.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AssemblyVersion.tt</DependentUpon>
-    </Compile>
-    <Compile Include="CachedShipTemplate.cs" />
     <Compile Include="CrewTransferBatch.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GUICrewTransferSelector.cs" />
     <Compile Include="GUIFlagSelector.cs" />
-    <Compile Include="GUIFlight.cs" />
     <Compile Include="GUIFlightsTab.cs" />
     <Compile Include="GUIMissionProfileSelector.cs" />
     <Compile Include="GUIOrbitEditor.cs" />
-    <Compile Include="GUIRichValueSelector.cs" />
-    <Compile Include="GUISpaceCenter.cs" />
-    <Compile Include="GUITrackingStation.cs" />
     <Compile Include="GUITransportSelector.cs" />
     <Compile Include="GUIPayloadShipSelector.cs" />
     <Compile Include="GUIRecordingTab.cs" />
     <Compile Include="GUIStartMissionTab.cs" />
     <Compile Include="GUITargetVesselSelector.cs" />
-    <Compile Include="InstallChecker.cs" />
-    <Compile Include="KACWrapper.cs" />
     <Compile Include="KSTS.cs" />
     <Compile Include="FlightRecorder.cs" />
     <Compile Include="GUI.cs" />
     <Compile Include="LifeSupportWrapper.cs" />
     <Compile Include="MissionController.cs" />
     <Compile Include="OrbitEditor.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StageRecoveryAPI.cs" />
     <Compile Include="TargetVessel.cs" />
-    <Compile Include="ThumbnailHelper.cs" />
-    <Compile Include="ToolbarRegistration.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="AssemblyVersion.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>AssemblyVersion.cs</LastGenOutput>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-set KSPDIR=$(KSPDIR)
+    <PostBuildEvent>if $(ConfigurationName) == Debug (
+"C:\Games\Tools\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
 
-IF "%25KSPDIR%25"=="" (
-
-	ECHO Configuration error - KSPDIR not specified in project.
-
-	ECHO Either set KSPDIR environment variable or edit BetterLoadSaveGame.Common.props
-
-	PAUSE
-
-	GOTO DONE
-
-)
-
-start /D $(SolutionDir) /WAIT deploy.bat  $(TargetDir) $(TargetFileName) $(TargetName)
-
-if $(ConfigurationName) == Release (	
-
-	start /D $(SolutionDir) /WAIT buildRelease.bat $(TargetDir) $(TargetFileName) $(TargetName)
-
-)
-</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>"$(DevEnvDir)\texttransform.exe" "$(ProjectDir)AssemblyVersion.tt"</PreBuildEvent>
+)</PostBuildEvent>
   </PropertyGroup>
   <!--<PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetPath)" "D:\KSP\KSTS\GameData\KSTS\$(TargetFileName)" &amp;&amp; copy /Y "$(TargetPath)" "D:\KSP\KSP\GameData\KSTS\$(TargetFileName)" &amp;&amp; copy /Y "D:\KSP\KSTS\GameData\KSTS\*" "D:\KSP\KSP\GameData\KSTS\"</PostBuildEvent>

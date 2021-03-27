@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using StageRecovery;
+using KSP.Localization;
+using static KSTS.Statics;
 
 namespace KSTS
 {
@@ -15,7 +17,7 @@ namespace KSTS
 
         public PayloadResource Clone()
         {
-            PayloadResource copy = new PayloadResource();
+            var copy = new PayloadResource();
             copy.name = name;
             copy.amount = amount;
             copy.mass = mass;
@@ -43,14 +45,14 @@ namespace KSTS
                 this.value = init.value;
                 this.partCount = init.partCount;
                 this.containsInvalidParts = init.containsInvalidParts;
-                foreach (Part part in init.parts) this.parts.Add(part);
+                foreach (var part in init.parts) this.parts.Add(part);
             }
         }
 
         // Turns the highlighting of the entire subassembly on or off:
         public void Highlight(bool switchOn)
         {
-            foreach (Part part in parts)
+            foreach (var part in parts)
             {
                 if (switchOn)
                 {
@@ -89,21 +91,21 @@ namespace KSTS
         // Gathers all important current stats for the given vessel (eg its mass, price, etc):
         public static RecordingVesselStats GetStats(FlightRecording recording, Vessel vessel)
         {
-            RecordingVesselStats stats = new RecordingVesselStats();
+            var stats = new RecordingVesselStats();
             stats.hasCrew = vessel.GetCrewCount() > 0;
             stats.payloadResources = new Dictionary<string, PayloadResource>();
             stats.dockingPortTypes = new List<string>();
 
-            foreach (Part part in vessel.parts)
+            foreach (var part in vessel.parts)
             {
-                string partName = SanitizeParteName(part.name);
+                var partName = SanitizeParteName(part.name);
 
                 // Check for modules which enable the vessel to perform certain actions:
-                List<ModuleDockingNode> dockingNodes = part.FindModulesImplementing<ModuleDockingNode>();
+                var dockingNodes = part.FindModulesImplementing<ModuleDockingNode>();
                 if (dockingNodes.Count() > 0)
                 {
                     stats.hasDockingPort = true;
-                    foreach (ModuleDockingNode dockingNode in dockingNodes)
+                    foreach (var dockingNode in dockingNodes)
                     {
                         if (!stats.dockingPortTypes.Contains(dockingNode.nodeType.ToString())) stats.dockingPortTypes.Add(dockingNode.nodeType.ToString()); // Docking-nodes have differnt sizes, like "node0", "node1", etc
                     }
@@ -118,10 +120,10 @@ namespace KSTS
                 // Sum up all the parts resources:
                 double resourceCost = 0;
                 double resourceCostMax = 0;
-                foreach (PartResource resource in part.Resources)
+                foreach (var resource in part.Resources)
                 {
                     PartResourceDefinition resourceDefinition = null;
-                    if (!KSTS.resourceDictionary.TryGetValue(resource.resourceName.ToString(), out resourceDefinition)) Debug.LogError("[KSTS] RecordingVesselStats.GetStats(): resource '" + resource.resourceName.ToString() + "' not found in dictionary");
+                    if (!KSTS.resourceDictionary.TryGetValue(resource.resourceName.ToString(), out resourceDefinition)) Debug.LogError("RecordingVesselStats.GetStats(): resource '" + resource.resourceName.ToString() + "' not found in dictionary");
                     else
                     {
                         // Cost:
@@ -152,18 +154,18 @@ namespace KSTS
 
                 // The cost of the part is only available in the AvailablePart-class:
                 AvailablePart availablePart = null;
-                if (!KSTS.partDictionary.TryGetValue(partName, out availablePart)) Debug.LogError("[KSTS] RecordingVesselStats.GetStats(): part '" + partName + "' not found in dictionary");
+                if (!KSTS.partDictionary.TryGetValue(partName, out availablePart)) Debug.LogError("RecordingVesselStats.GetStats(): part '" + partName + "' not found in dictionary");
                 else
                 {
                     // The cost of the part already includes the resource-costs, when completely filled:
-                    double dryCost = availablePart.cost - resourceCostMax;
+                    var dryCost = availablePart.cost - resourceCostMax;
                     stats.cost += dryCost;
                 }
             }
 
             // Find all crewed parts:
-            List<string> crewedPartIds = new List<string>();
-            foreach (ProtoCrewMember crewMember in vessel.GetVesselCrew())
+            var crewedPartIds = new List<string>();
+            foreach (var crewMember in vessel.GetVesselCrew())
             {
                 if (crewMember.seat == null || crewMember.seat.part == null) continue;
                 if (crewedPartIds.Contains(crewMember.seat.part.flightID.ToString())) continue;
@@ -182,15 +184,15 @@ namespace KSTS
         // TODO: Maybe we should look at the direction dockung-ports and decouples are facing. If they stay on the ship, thes should not count as payload, just as seperators should not get counted as well.
         protected PayloadAssembly FindPayloadAssemblies(FlightRecording recording, Part part, Part parent, List<string> crewedPartIds)
         {
-            PayloadAssembly assembly = new PayloadAssembly();
+            var assembly = new PayloadAssembly();
 
             // Iterate through all attached parts:
-            List<Part> attachedParts = new List<Part>(part.children);
+            var attachedParts = new List<Part>(part.children);
             if (part.parent != null) attachedParts.Add(part.parent);
-            foreach (Part attachedPart in attachedParts)
+            foreach (var attachedPart in attachedParts)
             {
                 if (parent != null && attachedPart.flightID == parent.flightID) continue; // Ignore the part we came from in the iteration.
-                PayloadAssembly subassembly = this.FindPayloadAssemblies(recording, attachedPart, part, crewedPartIds);
+                var subassembly = this.FindPayloadAssemblies(recording, attachedPart, part, crewedPartIds);
                 if (subassembly == null) continue;
                 assembly.mass += subassembly.mass;
                 assembly.partCount += subassembly.partCount;
@@ -209,7 +211,7 @@ namespace KSTS
                 if (!assembly.containsInvalidParts)
                 {
                     // Create a copy of the assembly, which will alow us to use the original object for assemblies higher up the recursion-chain:
-                    PayloadAssembly payloadAssembly = new PayloadAssembly(assembly);
+                    var payloadAssembly = new PayloadAssembly(assembly);
 
                     AvailablePart availablePart = null;
                     if (KSTS.partDictionary.TryGetValue(part.name.ToString(), out availablePart)) payloadAssembly.name = availablePart.title.ToString();
@@ -232,11 +234,11 @@ namespace KSTS
 
             // Determine the cost of the current part:
             double partCost = 0;
-            string partName = SanitizeParteName(part.name);
+            var partName = SanitizeParteName(part.name);
             if (KSTS.partDictionary.ContainsKey(partName))
             {
                 partCost += KSTS.partDictionary[partName].cost; // Includes resource-costs
-                foreach (PartResource resource in part.Resources)
+                foreach (var resource in part.Resources)
                 {
                     // Determine the real value of the part with the current amount of resources inside:
                     if (!KSTS.resourceDictionary.ContainsKey(resource.resourceName)) continue;
@@ -287,7 +289,7 @@ namespace KSTS
 
             status = FlightRecordingStatus.PRELAUNCH;
             startTime = Planetarium.GetUniversalTime();
-            profileName = vessel.vesselName.ToString();
+            profileName = Localizer.Format(vessel.vesselName);
 
             // Save the minimum altitude we need for a stable orbit as well as the launch-body's name:
             launchBodyName = vessel.mainBody.bodyName;
@@ -309,7 +311,7 @@ namespace KSTS
 
         public static FlightRecording CreateFromConfigNode(ConfigNode node)
         {
-            FlightRecording recording = new FlightRecording();
+            var recording = new FlightRecording();
             return (FlightRecording)CreateFromConfigNode(node, recording);
         }
 
@@ -394,8 +396,8 @@ namespace KSTS
             // Try to dump the requested amount of resources from the vessel:
             foreach (var item in requestedResources)
             {
-                string requestedName = item.Key;
-                double requestedAmount = item.Value;
+                var requestedName = item.Key;
+                var requestedAmount = item.Value;
 
                 PayloadResource payloadResource = null;
                 if (!this.currentStats.payloadResources.TryGetValue(requestedName, out payloadResource)) continue;
@@ -403,13 +405,13 @@ namespace KSTS
                 if (requestedAmount < 0) requestedAmount = 0;
 
                 // Find parts to dump the resources from:
-                double amountToDump = requestedAmount;
-                foreach (Part part in vessel.parts)
+                var amountToDump = requestedAmount;
+                foreach (var part in vessel.parts)
                 {
                     if (amountToDump <= 0) break;
-                    double dumpedAmount = part.RequestResource(requestedName, amountToDump);
+                    var dumpedAmount = part.RequestResource(requestedName, amountToDump);
                     if (dumpedAmount == 0) continue;
-                    Debug.Log("[KSTS] dumped " + dumpedAmount.ToString() + " of " + requestedName.ToString() + " from " + part.name.ToString());
+                    Log.Warning("dumped " + dumpedAmount.ToString() + " of " + requestedName.ToString() + " from " + part.name.ToString());
                     amountToDump -= dumpedAmount;
                     dumpedMass += dumpedAmount * payloadResource.mass;
                     if (KSTS.resourceDictionary.ContainsKey(payloadResource.name)) dumpedFunds += dumpedAmount * KSTS.resourceDictionary[payloadResource.name].unitCost;
@@ -441,21 +443,21 @@ namespace KSTS
             // Deploy all selected payloads:
             double deployedMass = 0;
             double deployedFunds = 0;
-            foreach (PayloadAssembly payloadAssembly in payloadAssemblies)
+            foreach (var payloadAssembly in payloadAssemblies)
             {
                 if (!payloadAssembly.detachmentPart || !this.vessel) continue;
                 if (!this.vessel.parts.Contains(payloadAssembly.detachmentPart)) continue; // The subassembly was probably already detached together with a bigger one.
                 payloadAssembly.Highlight(false); // Turn off highlighting, in case it was on.
 
-                foreach (ModuleDockingNode dockingModule in payloadAssembly.detachmentPart.FindModulesImplementing<ModuleDockingNode>())
+                foreach (var dockingModule in payloadAssembly.detachmentPart.FindModulesImplementing<ModuleDockingNode>())
                 {
                     dockingModule.Decouple();
                 }
-                foreach (ModuleDecouple decoupleModule in payloadAssembly.detachmentPart.FindModulesImplementing<ModuleDecouple>())
+                foreach (var decoupleModule in payloadAssembly.detachmentPart.FindModulesImplementing<ModuleDecouple>())
                 {
                     decoupleModule.Decouple();
                 }
-                foreach (ModuleAnchoredDecoupler decoupleModule in payloadAssembly.detachmentPart.FindModulesImplementing<ModuleAnchoredDecoupler>())
+                foreach (var decoupleModule in payloadAssembly.detachmentPart.FindModulesImplementing<ModuleAnchoredDecoupler>())
                 {
                     decoupleModule.Decouple();
                 }
@@ -482,10 +484,10 @@ namespace KSTS
         // Returns a list of key-value pairs to display the current stats of the recording on the GUI:
         public List<KeyValuePair<string, string>> GetDisplayAttributes()
         {
-            List<KeyValuePair<string, string>> list = new List<KeyValuePair<string, string>>();
+            var list = new List<KeyValuePair<string, string>>();
             try
             {
-                string statusText = "N/A";
+                var statusText = "N/A";
                 switch (this.status)
                 {
                     case FlightRecordingStatus.PRELAUNCH:
@@ -533,7 +535,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] GetDisplayAttributes(): " + e.ToString());
+                Debug.LogError("GetDisplayAttributes(): " + e.ToString());
             }
             return list;
         }
@@ -581,7 +583,7 @@ namespace KSTS
                 {
                     if (flightRecording.Value.status != FlightRecordingStatus.PRELAUNCH)
                     {
-                        Debug.Log("[KSTS] recovered stage " + stageVesselId + " of vessel " + vesselId + " for " + recoveredFunds.ToString() + " funds");
+                        Log.Warning("recovered stage " + stageVesselId + " of vessel " + vesselId + " for " + recoveredFunds.ToString() + " funds");
                         flightRecording.Value.launchCost -= recoveredFunds;
                         if (flightRecording.Value.launchCost < 0) flightRecording.Value.launchCost = 0;
                     }
@@ -600,17 +602,17 @@ namespace KSTS
             if (FlightGlobals.Vessels.Count == 0) return;
 
             // Build list of all existing vessel-IDs:
-            List<string> existingVesselIds = FlightGlobals.Vessels.Select(vessel => vessel.id.ToString()).ToList();
+            var existingVesselIds = FlightGlobals.Vessels.Select(vessel => vessel.id.ToString()).ToList();
 
             // Remove non-existing vessel-IDs from our internal tracking-lists:
-            foreach (string removeId in flightRecordings.Keys.Except(existingVesselIds).ToList())
+            foreach (var removeId in flightRecordings.Keys.Except(existingVesselIds).ToList())
             {
-                Debug.Log("[KSTS] removing flight recording for missing vessel '" + removeId + "'");
+                Log.Warning("removing flight recording for missing vessel '" + removeId + "'");
                 FlightRecorder.flightRecordings.Remove(removeId);
             }
             if (KSTS.stageParentDictionary != null)
             {
-                foreach (string removeId in KSTS.stageParentDictionary.Keys.Except(existingVesselIds).ToList())
+                foreach (var removeId in KSTS.stageParentDictionary.Keys.Except(existingVesselIds).ToList())
                 {
                     KSTS.stageParentDictionary.Remove(removeId);
                 }
@@ -620,10 +622,10 @@ namespace KSTS
         public static void LoadRecordings(ConfigNode node)
         {
             FlightRecorder.flightRecordings.Clear();
-            ConfigNode flightRecorderNode = node.GetNode("FlightRecorder");
+            var flightRecorderNode = node.GetNode("FlightRecorder");
             if (flightRecorderNode == null) return;
 
-            foreach (ConfigNode flightRecordingNode in flightRecorderNode.GetNodes())
+            foreach (var flightRecordingNode in flightRecorderNode.GetNodes())
             {
                 FlightRecorder.flightRecordings.Add(flightRecordingNode.name, FlightRecording.CreateFromConfigNode(flightRecordingNode));
             }
@@ -633,8 +635,8 @@ namespace KSTS
 
         public static void SaveRecordings(ConfigNode node)
         {
-            ConfigNode flightRecorderNode = node.AddNode("FlightRecorder");
-            foreach (KeyValuePair<string, FlightRecording> item in FlightRecorder.flightRecordings)
+            var flightRecorderNode = node.AddNode("FlightRecorder");
+            foreach (var item in FlightRecorder.flightRecordings)
             {
                 flightRecorderNode.AddNode(item.Value.CreateConfigNode(item.Key));
             }
@@ -664,7 +666,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] getFlightRecording(): " + e.ToString());
+                Debug.LogError("getFlightRecording(): " + e.ToString());
             }
             return recording;
         }
@@ -675,13 +677,13 @@ namespace KSTS
             try
             {
                 if (FlightRecorder.flightRecordings.ContainsKey(vessel.id.ToString())) throw new Exception("duplicate recording for vessel '" + vessel.id.ToString() + "'");
-                FlightRecording recording = new FlightRecording(vessel);
+                var recording = new FlightRecording(vessel);
                 FlightRecorder.flightRecordings.Add(vessel.id.ToString(), recording);
                 recording.status = FlightRecordingStatus.ASCENDING;
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] StartRecording(): " + e.ToString());
+                Debug.LogError("StartRecording(): " + e.ToString());
             }
         }
 
@@ -697,7 +699,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] CancelRecording(): " + e.ToString());
+                Debug.LogError("CancelRecording(): " + e.ToString());
             }
         }
 
@@ -715,7 +717,7 @@ namespace KSTS
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] SaveRecording(): " + e.ToString());
+                Debug.LogError("SaveRecording(): " + e.ToString());
             }
         }
 
@@ -728,9 +730,9 @@ namespace KSTS
                 FlightRecorder.CollectGarbage();
 
                 // Check if we are on an vessel which is recording a flight:
-                Vessel vessel = FlightGlobals.ActiveVessel;
+                var vessel = FlightGlobals.ActiveVessel;
                 if (!vessel) return;
-                FlightRecording recording = GetFlightRecording(vessel);
+                var recording = GetFlightRecording(vessel);
                 if (recording == null) return;
 
                 if (vessel.id.ToString() != FlightRecorder.timerVesselId)
@@ -741,27 +743,27 @@ namespace KSTS
                 }
 
                 // Check all parts, if something has changed which makes the part unusable for payload-deployments:
-                foreach (Part part in vessel.parts)
+                foreach (var part in vessel.parts)
                 {
                     if (recording.usedPartIds.Contains(part.flightID.ToString())) continue; // Already blocked
-                    bool blockThis = false;
-                    string partId = part.flightID.ToString();
+                    var blockThis = false;
+                    var partId = part.flightID.ToString();
 
                     // Check for running engines:
-                    foreach (ModuleEngines engineModule in part.FindModulesImplementing<ModuleEngines>())
+                    foreach (var engineModule in part.FindModulesImplementing<ModuleEngines>())
                     {
                         if (engineModule.GetCurrentThrust() > 0) blockThis = true;
                     }
-                    foreach (ModuleEnginesFX engineModule in part.FindModulesImplementing<ModuleEnginesFX>())
+                    foreach (var engineModule in part.FindModulesImplementing<ModuleEnginesFX>())
                     {
                         if (engineModule.GetCurrentThrust() > 0) blockThis = true;
                     }
 
                     // Check for resource-consumption:
-                    foreach (PartResource resource in part.Resources)
+                    foreach (var resource in part.Resources)
                     {
                         PartResourceDefinition resourceDefinition = null;
-                        string resourceId = resource.resourceName.ToString();
+                        var resourceId = resource.resourceName.ToString();
                         if (!KSTS.resourceDictionary.TryGetValue(resourceId, out resourceDefinition)) continue;
                         if (resourceDefinition.density <= 0) continue; // We only care about resources with mass, skipping electricity and such.
 
@@ -779,14 +781,14 @@ namespace KSTS
 
                     if (blockThis)
                     {
-                        Debug.Log("[KSTS] marking part " + part.name.ToString() + " (" + part.flightID.ToString() + ") as used");
+                        Log.Warning("marking part " + part.name.ToString() + " (" + part.flightID.ToString() + ") as used");
                         recording.usedPartIds.Add(part.flightID.ToString());
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("[KSTS] FlightRecoorder.Timer(): " + e.ToString());
+                Debug.LogError("FlightRecoorder.Timer(): " + e.ToString());
             }
         }
     }

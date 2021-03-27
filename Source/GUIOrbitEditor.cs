@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using KSP.Localization;
+using static KSTS.Statics;
 
 namespace KSTS
 {
@@ -45,10 +47,10 @@ namespace KSTS
             referenceVesselEpoch = 0;
         }
 
+        static string[] options = { "Simple Orbit", "Complex Orbit" };
         public void DisplayEditor()
         {
-            string[] options = { "Simple Orbit", "Complex Orbit" };
-            int newSelection = GUILayout.Toolbar(selectedEditorTab, options);
+            var newSelection = GUILayout.Toolbar(selectedEditorTab, options);
             if (newSelection != selectedEditorTab)
             {
                 selectedEditorTab = newSelection;
@@ -69,26 +71,26 @@ namespace KSTS
                     }
                     else
                     {
-                        List<string> refVessels = new List<string>();
-                        List<Orbit> refOrbits = new List<Orbit>();
+                        var refVessels = new List<string>();
+                        var refOrbits = new List<Orbit>();
 
                         // Find applicable vessels:
-                        foreach (Vessel refVessel in FlightGlobals.Vessels)
+                        foreach (var refVessel in FlightGlobals.Vessels)
                         {
                             if (refVessel.situation != Vessel.Situations.ORBITING || refVessel.orbit.referenceBody != this.body) continue;
                             if (refVessel.orbit.ApA > Math.Floor(this.missionProfile.maxAltitude)) continue;
-                            refVessels.Add("<b>" + refVessel.vesselName + "</b> (" + refVessel.vesselType.ToString() + ")");
+                            refVessels.Add("<b>" + Localizer.Format(refVessel.vesselName) + "</b> (" + refVessel.vesselType.ToString() + ")");
                             refOrbits.Add(refVessel.orbit);
                         }
 
                         GUILayout.Label("<b>Select Reference Vessel:</b>");
                         GUILayout.BeginHorizontal();
                         GUILayout.Label("", new GUIStyle(GUI.labelStyle) { fixedWidth = 10 }); // Just to indent the following list a little bit
-                        int selectedRefVessel = GUILayout.SelectionGrid(-1, refVessels.ToArray(), 1, GUI.selectionGridStyle);
+                        var selectedRefVessel = GUILayout.SelectionGrid(-1, refVessels.ToArray(), 1, GUI.selectionGridStyle);
                         GUILayout.EndHorizontal();
                         if (selectedRefVessel >= 0)
                         {
-                            Orbit refOrbit = refOrbits[selectedRefVessel];
+                            var refOrbit = refOrbits[selectedRefVessel];
                             inclinationSelector.Value = refOrbit.inclination;
                             eccentricitySelector.Value = refOrbit.eccentricity;
                             semiMajorAxisSelector.Value = refOrbit.semiMajorAxis;
@@ -162,7 +164,7 @@ namespace KSTS
 
         public static ConfigNode SaveOrbitToNode(Orbit orbit, string nodeName="orbit")
         {
-            ConfigNode node = new ConfigNode(nodeName);
+            var node = new ConfigNode(nodeName);
             node.AddValue("inclination", orbit.inclination);
             node.AddValue("eccentricity", orbit.eccentricity);
             node.AddValue("semiMajorAxis", orbit.semiMajorAxis);
@@ -191,9 +193,9 @@ namespace KSTS
         // Retrurns a new orbit, which is following the given orbit at the given distance:
         public static Orbit CreateFollowingOrbit(Orbit referenceOrbit, double distance)
         {
-            Orbit orbit = CreateOrbit(referenceOrbit.inclination, referenceOrbit.eccentricity, referenceOrbit.semiMajorAxis, referenceOrbit.LAN, referenceOrbit.argumentOfPeriapsis, referenceOrbit.meanAnomalyAtEpoch, referenceOrbit.epoch, referenceOrbit.referenceBody);
+            var orbit = CreateOrbit(referenceOrbit.inclination, referenceOrbit.eccentricity, referenceOrbit.semiMajorAxis, referenceOrbit.LAN, referenceOrbit.argumentOfPeriapsis, referenceOrbit.meanAnomalyAtEpoch, referenceOrbit.epoch, referenceOrbit.referenceBody);
             // The distance ("chord") between to points on a circle is given by: chord = 2r * sin( alpha / 2 )
-            double angle = Math.Sinh(distance / (2 * orbit.semiMajorAxis)) * 2; // Find the angle for the given distance
+            var angle = Math.Sinh(distance / (2 * orbit.semiMajorAxis)) * 2; // Find the angle for the given distance
             orbit.meanAnomalyAtEpoch += angle;
             return orbit;
         }
@@ -202,32 +204,32 @@ namespace KSTS
         public static Orbit ApplySafetyDistance(Orbit orbit, float vesselSize)
         {
             // Find out how many degrees one meter is on the given orbit (same formula as above):
-            double anglePerMeters = Math.Sinh(1.0 / (2 * orbit.semiMajorAxis)) * 2;
+            var anglePerMeters = Math.Sinh(1.0 / (2 * orbit.semiMajorAxis)) * 2;
 
             // Check with every other vessel on simmilar orbits, if they might collide in the future:
-            System.Random rnd = new System.Random();
-            int adjustmentIterations = 0;
+            var rnd = new System.Random();
+            var adjustmentIterations = 0;
             bool orbitAdjusted;
             do
             {
                 orbitAdjusted = false;
-                foreach (Vessel vessel in FlightGlobals.Vessels)
+                foreach (var vessel in FlightGlobals.Vessels)
                 {
                     if (vessel.situation != Vessel.Situations.ORBITING) continue;
                     if (vessel.orbit.referenceBody != orbit.referenceBody) continue;
 
                     // Find the next rendezvous (most of these parameters are just guesses, but they seem to work):
-                    double UT = Planetarium.GetUniversalTime();
+                    var UT = Planetarium.GetUniversalTime();
                     double dT = 86400;
                     double threshold = 5000;
-                    double MinUT = Planetarium.GetUniversalTime() - 86400;
-                    double MaxUT = Planetarium.GetUniversalTime() + 86400;
+                    var MinUT = Planetarium.GetUniversalTime() - 86400;
+                    var MaxUT = Planetarium.GetUniversalTime() + 86400;
                     double epsilon = 360;
-                    int maxIterations = 25;
-                    int iterationCount = 0;
+                    var maxIterations = 25;
+                    var iterationCount = 0;
                     vessel.orbit.UpdateFromUT(Planetarium.GetUniversalTime()); // We apparently have to update both orbits to the current time to make this work.
                     orbit.UpdateFromUT(Planetarium.GetUniversalTime());
-                    double closestApproach = Orbit._SolveClosestApproach(vessel.orbit, orbit, ref UT, dT, threshold, MinUT, MaxUT, epsilon, maxIterations, ref iterationCount);
+                    var closestApproach = Orbit._SolveClosestApproach(vessel.orbit, orbit, ref UT, dT, threshold, MinUT, MaxUT, epsilon, maxIterations, ref iterationCount);
                     if (closestApproach < 0) continue; // No contact
                     if (closestApproach > 10000) continue; // 10km should be fine
 
@@ -235,7 +237,7 @@ namespace KSTS
                     if (closestApproach < (blockerSize + vesselSize) / 2) // We assume the closest approach is calculated from the center of mass, which is why we use /2
                     {
                         // Adjust orbit:
-                        double adjustedAngle = (blockerSize / 2 + vesselSize / 2 + 1) * anglePerMeters; // Size of both vessels + 1m
+                        var adjustedAngle = (blockerSize / 2 + vesselSize / 2 + 1) * anglePerMeters; // Size of both vessels + 1m
                         if (adjustmentIterations >= 90) adjustedAngle *= rnd.Next(1, 1000); // Lets get bolder here, time is running out ...
 
                         // Modifying "orbit.meanAnomalyAtEpoch" works for the actual vessel, but apparently one would have to call some other method as well to updated
@@ -244,13 +246,13 @@ namespace KSTS
                         orbit = CreateOrbit(orbit.inclination, orbit.eccentricity, orbit.semiMajorAxis, orbit.LAN, orbit.argumentOfPeriapsis, orbit.meanAnomalyAtEpoch + adjustedAngle, orbit.epoch, orbit.referenceBody);
 
                         orbitAdjusted = true;
-                        Debug.Log("[KSTS] adjusting planned orbit by " + adjustedAngle + "° to avoid collision with '" + vessel.vesselName + "' (closest approach " + closestApproach.ToString() + "m @ " + UT.ToString() + " after " + iterationCount + " orbits)");
+                        Log.Warning("adjusting planned orbit by " + adjustedAngle + "° to avoid collision with '" + Localizer.Format(vessel.vesselName) + "' (closest approach " + closestApproach.ToString() + "m @ " + UT.ToString() + " after " + iterationCount + " orbits)");
                     }
                 }
                 adjustmentIterations++;
                 if (adjustmentIterations >= 100 && orbitAdjusted)
                 {
-                    Debug.LogError("[KSTS] unable to find a safe orbit after " + adjustmentIterations.ToString() + " iterations, the vessels will likely crash");
+                    Debug.LogError("unable to find a safe orbit after " + adjustmentIterations.ToString() + " iterations, the vessels will likely crash");
                     break;
                 }
             }

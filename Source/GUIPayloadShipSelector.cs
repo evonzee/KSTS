@@ -38,29 +38,66 @@ namespace KSTS
             return payload == null;
         }
 
+        string filter = "";
+        bool selVAB = true;
+        bool selSPH = true;
+        bool selSubassembly = true;
+        int[] indexReference;
         // Shows a list of all available ship-payloads and returns true, if the player has selected one:
+        // need to add filter
         public bool DisplayList()
         {
+            indexReference = new int[GUI.shipTemplates.Count];
+            int indexCnt = 0;
             CheckInternals();
+            GUILayout.BeginHorizontal();
             GUILayout.Label("<size=14><b>Payload:</b></size>");
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Filter:");
+            filter = GUILayout.TextField(filter, GUILayout.Width(200));
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            selVAB = GUILayout.Toggle(selVAB, "VAB");
+            GUILayout.Space(30);
+            selSPH = GUILayout.Toggle(selSPH, "SPH");
+            GUILayout.Space(30);
+            selSubassembly = GUILayout.Toggle(selSubassembly, "Subassemblies");
+            GUILayout.EndHorizontal();
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUI.scrollStyle);
 
             // Show list with all possible payloads:
-            List<GUIContent> contents = new List<GUIContent>();
-            foreach (CachedShipTemplate ship in GUI.shipTemplates)
+            var contents = new List<GUIContent>();
+            for (int i = 0; i < GUI.shipTemplates.Count; i++)
             {
-                contents.Add(new GUIContent(
-                    "<color=#F9FA86><b>" + ship.template.shipName + "</b></color>\n" +
-                    "<color=#FFFFFF><b>Size:</b> " + ship.template.shipSize.x.ToString("0.0m") + ", " + ship.template.shipSize.y.ToString("0.0m") + ", " + ship.template.shipSize.z.ToString("0.0m") + "</color>\n" +
-                    "<color=#FFFFFF><b>Mass:</b> " + ship.template.totalMass.ToString("0.0t") + "</color>\n" +
-                    "<color=#B3D355><b>Cost:</b> " + ship.template.totalCost.ToString("#,##0√") + "</color>"
-                    , ship.thumbnail
-                ));
+                var ship = GUI.shipTemplates[i];
+            
+                if (filter == "" || ship.template.shipName.Contains(filter))
+                {
+                    bool b = false;
+                    switch (ship.templateOrigin)
+                    {
+                        case TemplateOrigin.SPH: b = selSPH; break;
+                        case TemplateOrigin.VAB: b = selVAB; break;
+                        case TemplateOrigin.SubAssembly: b = selSubassembly; break;
+                    }
+                    if (b)
+                    {
+                        indexReference[indexCnt++] = i;
+                        contents.Add(new GUIContent(
+                            "<color=#F9FA86><b>" + ship.template.shipName + "</b></color>\n" +
+                            "<color=#FFFFFF><b>Size:</b> " + ship.template.shipSize.x.ToString("0.0m") + ", " + ship.template.shipSize.y.ToString("0.0m") + ", " + ship.template.shipSize.z.ToString("0.0m") + "</color>\n" +
+                            "<color=#FFFFFF><b>Mass:</b> " + ship.template.totalMass.ToString("0.0t") + "</color>\n" +
+                            "<color=#B3D355><b>Cost:</b> " + ship.template.totalCost.ToString("#,##0√") + "</color>"
+                            , ship.thumbnail
+                        ));
+                    }
+                }
             }
             if ((selectedIndex = GUILayout.SelectionGrid(selectedIndex, contents.ToArray(), 1, GUI.selectionGridStyle)) >= 0)
             {
                 // The player has selected a payload:
-                payload = GUI.shipTemplates[selectedIndex];
+                payload = GUI.shipTemplates[indexReference[selectedIndex]];
             }
             GUILayout.EndScrollView();
             return payload != null;

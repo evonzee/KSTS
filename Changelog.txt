@@ -1,0 +1,102 @@
+ChangeLog
+
+2.0.1.7
+	Added new dependency, SpaceTuxLibrary
+	Replaced internal Log class with one from SpaceTuxLibrary
+	Added unique window ids by using SpaceTuxUtility.WindowHelper.NextWindowId
+	Deleted old disabled code
+	Added KAC alarms for the missions
+	Changed min version to 1.10.1
+	New dependency, SpaceTuxLibrary
+
+2.0.1.6
+	Fixed issue with selection of a ship selecting the nth ship 
+	Changed a few foreach's to for (int i = 0...) for efficiency
+
+2.0.1.5
+	Removed leftover line at beginning of ReadAllCraftFiles:   if (HighLogic.LoadedSceneIsFlight)
+
+2.0.1.4
+	Another fix for the ghost ships, caused when loaded a subassembly while in the light scene
+
+2.0.1.3
+	Added check for existance of Subassemblies folder to avoid an error if it doesn't exist
+
+2.0.1.2
+	Full fix for the "ghost ships", was caused by invalid characters in the craft file name.
+
+2.0.1.1
+	Fixed "ghost ships" sometimes appearing in flight and in the editor, somehow caused by the thumbnail generation code when used on VAB & SPH craft files
+	Replaced calls to Debug.Log with new class Log, for better control of log messages
+
+2.0.1
+	Updated help text
+	Added filter to payload selection
+	Added subassemblies as available payloads
+	Added toggles to select from VAB, SPH & Subassemblies
+	Added code to create thumbnails for subassemblies and any missing ship thumbnails
+
+2.0.0.1
+	Some memory optimizations by moving string arrays which have fixed data out of methods and made static
+	Fixed mission buttons being greyed out even though missions were recorded
+
+2.0.0
+	Adoption by Linuxgurugamer
+	Moved button icon and placeholder icon into PluginData
+	Moved help.txt into PluginData
+	Merged in changes by Eric Vz
+		adjust build references to my locations
+		Add ability to launch / record from other bodies than Kerbin
+		Tweak for atmosphere-less bodies
+		update readme to mention my patches
+		Allow deployment from other planets than homeworld
+		Don't crash when opening transport tab. 
+
+		Note:  Based on comments on his repo:  Still need to fix transport to non-Kerbin bodies
+	Wrapped most vesselName entries with Localizer.Format()
+	Added an "Abort Recording & Revert to Launch" option
+	Disabled the "Start Recording" button if no decoupler is selected (for deploy), more than 1 decoupler selected or no payload mass selected (for Transport)
+	Added red/green color to the StartRecording button as additional indication 
+	Disabled the top buttons if no missions are available
+	Minor editing of the help file
+	Replaced button code with ToolbarControl
+	Added support of ClickThroughBlocker
+	Moved all classes originally in GUI.cs into individual files
+
+1.11
+	KSP 1.4.2 update
+
+1.10
+	Re-compiled for KSP 1.4 and added support for the Stage Recovery Mod.
+
+1.9
+	KSP 1.3 update
+	recompiled for KSP 1.3
+
+1.8
+	KSP 1.2.2 update
+
+1.7
+	fix for struts and fuel-lines
+
+1.6
+	fixed issues with part-IDs, missing kerbals and game-events
+
+1.5
+	enabled tourists as crew
+
+1.4
+	added support for complex orbits
+
+1.3
+	ship creation fixes and improvements
+
+1.2
+	added construction missions
+
+1.1
+	KSP 1.2 update
+
+1.0
+	initial commit
+	

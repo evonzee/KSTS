@@ -5,8 +5,10 @@ namespace KSTS
 {
     class GUIRecordingTab
     {
+        enum MissionTypes { Deploy = 0, Transport = 1 };
+
         private static bool initialized = false;
-        private static int selectedMissionTypeTab = 0;
+        private static int selectedMissionTypeTab = (int)MissionTypes.Deploy;
         private static Vector2 scrollPos = Vector2.zero;
         private static Dictionary<string, double> selectedPayloadDeploymentResources = null;
         private static List<string> selectedPayloadAssemblyIds = null;
@@ -30,10 +32,13 @@ namespace KSTS
             if (selectedPayloadAssemblyIds != null) selectedPayloadAssemblyIds.Clear();
         }
 
+        
+        static string[] missionTypeStrings = new string[] { "Deploy", "Transport" };
         public static void Display()
         {
             if (!initialized) Initialize();
-            Vessel vessel = FlightGlobals.ActiveVessel;
+
+            var vessel = FlightGlobals.ActiveVessel;
             FlightRecording recording = null;
             if (vessel) recording = FlightRecorder.GetFlightRecording(vessel);
             if (!vessel || recording == null)
@@ -87,8 +92,8 @@ namespace KSTS
 
                 // Display all Information about the current recording:
                 GUILayout.BeginScrollView(new Vector2(0, 0), new GUIStyle(GUI.scrollStyle) { stretchHeight = true });
-                List<KeyValuePair<string, string>> displayAttributes = recording.GetDisplayAttributes();
-                foreach (KeyValuePair<string, string> displayAttribute in displayAttributes)
+                var displayAttributes = recording.GetDisplayAttributes();
+                foreach (var displayAttribute in displayAttributes)
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("<b>" + displayAttribute.Key + "</b>");
@@ -96,18 +101,18 @@ namespace KSTS
                     GUILayout.EndHorizontal();
                 }
                 GUILayout.EndScrollView();
-
+                int selected = 0;
                 // Display payload selector:
                 if (recording.status == FlightRecordingStatus.ASCENDING || recording.status == FlightRecordingStatus.PRELAUNCH)
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("<size=14><b>Mission Type:</b></size>");
-                    string[] missionTypeStrings = new string[] { "Deploy", "Transport" };
+               
                     selectedMissionTypeTab = GUILayout.Toolbar(selectedMissionTypeTab, missionTypeStrings);
                     GUILayout.EndHorizontal();
-
+               
                     scrollPos = GUILayout.BeginScrollView(scrollPos, GUI.scrollStyle, GUILayout.Height(210), GUILayout.MaxHeight(210));
-                    if (selectedMissionTypeTab == 0)
+                    if (selectedMissionTypeTab == (int)MissionTypes.Deploy)
                     {
                         // Show all deployable payloads:
                         if (!recording.CanPerformMission(MissionProfileType.DEPLOY))
@@ -117,12 +122,13 @@ namespace KSTS
                         else
                         {
                             // Show all detachable subassemblies:
-                            bool selectionChanged = false;
-                            foreach (PayloadAssembly payloadAssembly in recording.GetPayloadAssemblies())
+                            var selectionChanged = false;
+                            foreach (var payloadAssembly in recording.GetPayloadAssemblies())
                             {
                                 GUILayout.BeginHorizontal();
                                 if (GUILayout.Toggle(selectedPayloadAssemblyIds.Contains(payloadAssembly.id), "<b>" + payloadAssembly.name + "</b>"))
                                 {
+                                    selected++;
                                     if (!selectedPayloadAssemblyIds.Contains(payloadAssembly.id))
                                     {
                                         selectedPayloadAssemblyIds.Add(payloadAssembly.id);
@@ -144,8 +150,8 @@ namespace KSTS
                             // Highlight all selected assemblies (to make sure these don't cancel each other out, we first turn all off and then switch the selected ones on):
                             if (selectionChanged)
                             {
-                                foreach (PayloadAssembly payloadAssembly in recording.GetPayloadAssemblies()) payloadAssembly.Highlight(false);
-                                foreach (PayloadAssembly payloadAssembly in recording.GetPayloadAssemblies()) if (selectedPayloadAssemblyIds.Contains(payloadAssembly.id)) payloadAssembly.Highlight(true);
+                                foreach (var payloadAssembly in recording.GetPayloadAssemblies()) payloadAssembly.Highlight(false);
+                                foreach (var payloadAssembly in recording.GetPayloadAssemblies()) if (selectedPayloadAssemblyIds.Contains(payloadAssembly.id)) payloadAssembly.Highlight(true);
                             }
                         }
                     }
@@ -159,7 +165,7 @@ namespace KSTS
                         {
                             // Show all payload-resources:
                             double totalPayloadMass = 0;
-                            foreach (PayloadResource payloadResource in recording.GetPayloadResources())
+                            foreach (var payloadResource in recording.GetPayloadResources())
                             {
                                 double selectedAmount = 0;
                                 selectedPayloadDeploymentResources.TryGetValue(payloadResource.name, out selectedAmount);
@@ -178,7 +184,7 @@ namespace KSTS
                                 if (selectedPayloadDeploymentResources.ContainsKey(payloadResource.name)) selectedPayloadDeploymentResources[payloadResource.name] = selectedAmount;
                                 else selectedPayloadDeploymentResources.Add(payloadResource.name, selectedAmount);
                             }
-
+                            selected = (totalPayloadMass > 0)?1:0;
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("<b>Total Payload</b>");
                             GUILayout.Label(totalPayloadMass.ToString("#,##0.00 t  "), new GUIStyle(GUI.labelStyle) { alignment = TextAnchor.MiddleRight });
@@ -190,19 +196,33 @@ namespace KSTS
 
                 // Bottom pane with action-buttons:
                 GUILayout.BeginHorizontal();
-                if (recording.status == FlightRecordingStatus.PRELAUNCH && GUILayout.Button("Record", GUI.buttonStyle))
+                if (selected != 1)
+                {
+                    UnityEngine.GUI.enabled = false;
+                    UnityEngine.GUI.backgroundColor = Color.red;
+                }
+                else
+                {
+                    Color c = Color.green;
+                    c.a = 1;
+                    UnityEngine.GUI.backgroundColor = c;
+                }
+  
+                if (recording.status == FlightRecordingStatus.PRELAUNCH && GUILayout.Button("Start Recording", GUI.buttonStyle))
                 {
                     // Start Recording:
                     FlightRecorder.StartRecording(vessel);
                 }
-
+                UnityEngine.GUI.enabled = true;
+                UnityEngine.GUI.backgroundColor = GUI.normalGUIbackground;
+                
                 if (recording.CanDeploy() && GUILayout.Button("Release Payload", GUI.buttonStyle))
                 {
-                    if (selectedMissionTypeTab == 0)
+                    if (selectedMissionTypeTab == (int)MissionTypes.Deploy)
                     {
-                        List<PayloadAssembly> payloadAssemblies = recording.GetPayloadAssemblies();
-                        List<PayloadAssembly> selectedPayloadAssemblies = new List<PayloadAssembly>();
-                        foreach (PayloadAssembly payloadAssembly in recording.GetPayloadAssemblies())
+                        var payloadAssemblies = recording.GetPayloadAssemblies();
+                        var selectedPayloadAssemblies = new List<PayloadAssembly>();
+                        foreach (var payloadAssembly in recording.GetPayloadAssemblies())
                         {
                             if (selectedPayloadAssemblyIds.Contains(payloadAssembly.id)) selectedPayloadAssemblies.Add(payloadAssembly);
                         }
@@ -220,10 +240,18 @@ namespace KSTS
                     FlightRecorder.SaveRecording(vessel);
                 }
 
-                if (recording.status != FlightRecordingStatus.PRELAUNCH && GUILayout.Button("Abort", GUI.buttonStyle))
+                if (recording.status != FlightRecordingStatus.PRELAUNCH)
                 {
-                    // Cancel runnig recording:
-                    FlightRecorder.CancelRecording(vessel);
+                    if (GUILayout.Button("Abort Recording", GUI.buttonStyle))
+                    {
+                        // Cancel runnig recording:
+                        FlightRecorder.CancelRecording(vessel);
+                    }
+                    if (GUILayout.Button("Abort Recording and Revert to Launch"))
+                    {
+                        FlightRecorder.CancelRecording(vessel);
+                        FlightDriver.RevertToLaunch();
+                    }
                 }
                 GUILayout.EndHorizontal();
             }

@@ -2,24 +2,25 @@
 
 KSTS allows you to automate missions like transporting payloads into space, refueling orbiting vessels and shuttling crew-members from and to Kerbin. To get started, you should build a rocket capable of reaching orbit and record your first mission.
 
-<size=16><b>Recording flights</b></size>
+<size=16><b>Recording flights (see below for payload info)</b></size>
 
-<b>General</b>
+<size=14><b>General</b></size>
 While on the launchpad hit "Record" to start recording and then try to reach orbit as fast and efficiently as possible. Once in orbit, you can select your desired payload and hit "Release Payload" (it might be wise to save your game beforehand). This will allow you to later transport a payload with equal mass to a similar orbit. The maximum apoapsis of your future missions will be your current periapsis, so try to fly as high as possible.
-After releasing your payload you can either hit "Stop & Save" to store the current recording as a new mission-profile, or you can try to return your vessel to Kerbin (if you have a pilot on board, you have to return). If you successfully land your ship, the current value of the vessel will be subtracted from the cost of future missions and you will be able to transport crew-members back to Kerbin with that mission-profile.
+After releasing your payload you can either hit <b>Stop & Save</b> to store the current recording as a new mission-profile, or you can try to return your vessel to Kerbin (if you have a pilot on board, you have to return). If you successfully land your ship, the current value of the vessel will be subtracted from the cost of future missions and you will be able to transport crew-members back to Kerbin with that mission-profile.
 
-<b>Deployment mission-profiles</b>
+<size=14><b>Deployment mission-profiles</b></size>
 A deployment mission will allow you to deploy new vessels around Kerbin. 
 For a deployment mission you will need a vessel that has a subset of parts connected to your vessel by decouplers, seperators or docking-ports. Please note that these parts must not be used during your ascent (no running engines, no fuel-consumption), they may not contain any crew-members and they must not contain the root-part of your vessel.
 Once you click "Release Payload", the selected parts will decouple and will count as "deployed".
 
-<b>Transport mission-profiles</b>
+<size=14><b>Transport mission-profiles</b></size>
 To perform a transport-mission your ship will need at least one docking-port as well as some RCS-thrusters for docking. Once you are in orbit, you can select any amount of resources that is still left in your vessel and when you hit "Release Payload", it will get dumped into space. Afterwards you will be able to transport an equivalent amount to other vessels in orbit.
 If you want to record a mission that includes a return-trip, make sure to leave some fuel in the tank.
 Also note that there is no distinction between crew and resource transport-missions, just record a resource-transport mission and you will be able to also shuttle crew-members into orbit, providing your transport-craft has enough seats.
 
 <size=16><b>Deployment missions</b></size>
-To deploy a new vessel into Kerbin's orbit, you just select the desired ship, mission-profile which can lift the required mass and a target-orbit. Once the ETA is reached, the new vessel will appear.
+To deploy a new vessel into Kerbin's orbit, you just select the desired payload, and then the desired ship/mission-profile which can lift the required mass and a target-orbit. Once the ETA is reached, the new vessel will appear.
+
 Please note that for technical reasons deployment missions can only be executed while you are at the space center.
 
 <size=16><b>Transport missions</b></size>
@@ -28,5 +29,8 @@ For technical reasons transport missions will only complete on vessels which are
 For the sake of simplicity crew-members will get transferred at the time mission completes. Which means that there is no time required for possible return-trips and you should leave Kerbals alone, which you have selected to get transported into orbit.
 
 <size=16><b>Construction missions</b></size>
-Construction-missions allow you to build new ships directly in orbit which would otherwise be too large to be launched with a deployment-mission. To launch a construction-mission, you will need a space-station in Kerbin orbit (the vessel-type must be “station”) with at least one engineer on board as well as a transport-mission profile, which is able to reach said space station. The space station will function as your space dock and while the engineer constructs the new vessel, the selected transport-vessel will shuttle all the required parts into orbit.
+Construction-missions allow you to build new ships directly in orbit which would otherwise be too large to be launched with a deployment-mission. To launch a construction-mission, you will need a space-station in Kerbin orbit (the vessel-type must be <b>station</b>) with at least one engineer on board as well as a transport-mission profile, which is able to reach said space station. The space station will function as your space dock and while the engineer constructs the new vessel, the selected transport-vessel will shuttle all the required parts into orbit.
 Please note that a single engineer will only be able to construct a vessel with a maximum dry mass of 10t and that the construction will take some time, one Kerbin-day per ton of dry mass to be exact. You can however halve the required construction time with each scientist stationed on the dock and double the maximum construction size with each additional engineer on your station.
+
+<size=24><b>Creating Payloads</b></size>
+You create a payload in the editor (VAB or SPH) and save it as a vessel.  Give it a recognizable name.  Then exit the editor, and open KSTS, when you select the mission, all saved vessels will be listed as potential payloads.  Make sure that the payload that you select is less than or equal to the maximum payload brought to orbit by the recorded mission.
